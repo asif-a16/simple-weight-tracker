@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Dot
 } from 'recharts'
-import { getDateRange, formatDate, type DateFilter } from '@simple-wt/shared'
+import { getDateRange, formatDate, formatWeight, type DateFilter } from '@simple-wt/shared'
 
 interface LogEntry {
   id: string
@@ -127,7 +127,7 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
                   return (
                     <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg text-sm">
                       <p className="font-medium text-gray-900">{d.label}</p>
-                      <p className="text-blue-600 font-semibold">{d.weight} kg</p>
+                      <p className="text-blue-600 font-semibold">{formatWeight(d.weight)}</p>
                     </div>
                   )
                 }}
@@ -151,8 +151,8 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
         <div className="grid grid-cols-3 gap-4">
           {[
             { label: 'Entries', value: filtered.length },
-            { label: 'Min', value: `${Math.min(...weights).toFixed(1)} kg` },
-            { label: 'Max', value: `${Math.max(...weights).toFixed(1)} kg` },
+            { label: 'Min', value: formatWeight(Math.min(...weights)) },
+            { label: 'Max', value: formatWeight(Math.max(...weights)) },
           ].map(({ label, value }) => (
             <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
               <p className="text-2xl font-bold text-gray-900">{value}</p>

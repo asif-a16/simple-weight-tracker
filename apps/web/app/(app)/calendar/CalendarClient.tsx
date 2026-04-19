@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { type WeightLog } from '@simple-wt/shared'
+import { formatWeight, type WeightLog } from '@simple-wt/shared'
 import LogWeightForm from '@/components/weight/LogWeightForm'
 
 interface Props {
@@ -99,7 +99,7 @@ export default function CalendarClient({ logs, accountCreatedAt }: Props) {
               >
                 <span className="font-medium">{day}</span>
                 {entry && (
-                  <span className="text-xs text-blue-500 leading-tight">{entry.weight_kg}kg</span>
+                  <span className="text-xs text-blue-500 leading-tight">{formatWeight(entry.weight_kg)}</span>
                 )}
               </button>
             )

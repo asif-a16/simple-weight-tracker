@@ -23,7 +23,7 @@ export function formatDate(dateStr: string): string {
 }
 
 export function formatWeight(weight: number): string {
-  return weight % 1 === 0 ? `${weight} kg` : `${weight.toFixed(1)} kg`
+  return `${weight.toFixed(2)} kg`
 }
 
 export function sanitizeNotes(notes: string | null | undefined): string | null {
