@@ -27,25 +27,8 @@ config.resolver.unstable_enableSymlinks = true
 // shares one instance. We only redirect the bare package name — NOT subpaths
 // like react-native/Libraries/… — so Metro's own platform-aware resolver
 // still picks .android.js/.native.js variants for internal requires.
-const FORCE_ROOT = [
-  'react',
-  'react/jsx-runtime',
-  'react/jsx-dev-runtime',
-  'react-native',
-  'react-native-svg',
-]
-config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (FORCE_ROOT.includes(moduleName)) {
-    try {
-      return {
-        filePath: require.resolve(moduleName, { paths: [workspaceRoot] }),
-        type: 'sourceFile',
-      }
-    } catch {
-      // fall through to default resolution
-    }
-  }
-  return context.resolveRequest(context, moduleName, platform)
-}
+// With node-linker=hoisted removed, pnpm uses symlinks. unstable_enableSymlinks
+// resolves them to the real .pnpm store path so every package has one module ID.
+// No manual resolveRequest deduplication needed.
 
 module.exports = config
