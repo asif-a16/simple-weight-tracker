@@ -105,6 +105,7 @@ export default function HistoryScreen() {
               initialWeight={editEntry.weight_kg}
               initialNotes={editEntry.notes}
               onSuccess={() => { setEditEntry(null); fetchLogs() }}
+              showHeading
             />
           </View>
         )}

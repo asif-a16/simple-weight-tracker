@@ -15,9 +15,10 @@ interface Props {
   initialNotes?: string | null
   entryId?: string
   onSuccess?: () => void
+  showHeading?: boolean
 }
 
-export default function LogScreen({ initialDate, initialWeight, initialNotes, entryId, onSuccess }: Props) {
+export default function LogScreen({ initialDate, initialWeight, initialNotes, entryId, onSuccess, showHeading = false }: Props) {
   const today = new Date().toISOString().slice(0, 10)
   const [serverError, setServerError] = useState<string | null>(null)
   const { colors } = useTheme()
@@ -61,7 +62,7 @@ export default function LogScreen({ initialDate, initialWeight, initialNotes, en
   return (
     <KeyboardAvoidingView style={s.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={s.container} keyboardShouldPersistTaps="handled">
-        <Text style={s.heading}>{entryId ? 'Edit Entry' : 'Log Weight'}</Text>
+        {showHeading && <Text style={s.heading}>{entryId ? 'Edit Entry' : 'Log Weight'}</Text>}
 
         {serverError && <Text style={s.serverError}>{serverError}</Text>}
 

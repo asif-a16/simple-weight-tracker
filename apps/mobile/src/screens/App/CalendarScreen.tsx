@@ -83,6 +83,7 @@ export default function CalendarScreen() {
               initialWeight={modalEntry?.weight_kg}
               initialNotes={modalEntry?.notes}
               onSuccess={() => { setModalDate(null); fetchAll() }}
+              showHeading
             />
           </View>
         )}

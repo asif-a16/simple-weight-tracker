@@ -60,8 +60,6 @@ export default function DashboardScreen({ navigation }: Props) {
 
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
-      <Text style={s.heading}>Dashboard</Text>
-
       <TouchableOpacity style={s.logBtn} onPress={() => navigation.navigate('Log')} activeOpacity={0.85}>
         <Text style={s.logBtnText}>+ Log Weight</Text>
       </TouchableOpacity>
