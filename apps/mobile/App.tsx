@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { StatusBar } from 'expo-status-bar'
 import { ActivityIndicator, TouchableOpacity, Text, View } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { ThemeProvider, useTheme } from './src/context/ThemeContext'
 import { AuthProvider, useAuth } from './src/context/AuthContext'
 import LoginScreen from './src/screens/Auth/LoginScreen'
@@ -38,7 +39,7 @@ function AppNavigator() {
   const { colors, dark } = useTheme()
   return (
     <AppTab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         tabBarActiveTintColor: '#2563eb',
         tabBarInactiveTintColor: dark ? '#6B7280' : '#9ca3af',
         tabBarStyle: { borderTopColor: colors.border, backgroundColor: colors.surface },
@@ -46,7 +47,17 @@ function AppNavigator() {
         headerTintColor: colors.text,
         headerShadowVisible: false,
         headerRight: () => <DarkModeToggle />,
-      }}
+        tabBarIcon: ({ focused, color, size }) => {
+          const icons: Record<string, [string, string]> = {
+            Dashboard: ['home', 'home-outline'],
+            Log: ['add-circle', 'add-circle-outline'],
+            History: ['list', 'list-outline'],
+            Calendar: ['calendar', 'calendar-outline'],
+          }
+          const [active, inactive] = icons[route.name] ?? ['ellipse', 'ellipse-outline']
+          return <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />
+        },
+      })}
     >
       <AppTab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Dashboard' }} />
       <AppTab.Screen name="Log" component={LogScreen} options={{ title: 'Log Weight' }} />
@@ -69,16 +80,6 @@ function RootNavigator() {
   return user ? <AppNavigator /> : <AuthNavigator />
 }
 
-export default function App() {
-  return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ThemeProvider>
-  )
-}
-
 function AppContent() {
   const { dark } = useTheme()
   return (
@@ -86,5 +87,15 @@ function AppContent() {
       <StatusBar style={dark ? 'light' : 'dark'} />
       <RootNavigator />
     </NavigationContainer>
+  )
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
   )
 }

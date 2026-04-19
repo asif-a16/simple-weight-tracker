@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Dimensions, ActivityIndicator,
 } from 'react-native'
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { VictoryLine, VictoryChart, VictoryAxis, VictoryScatter, VictoryTooltip, VictoryVoronoiContainer } from 'victory-native'
 import { getDateRange, formatDate, formatWeight, type DateFilter } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
@@ -19,7 +20,9 @@ const FILTERS: FilterOption[] = [
 
 interface LogEntry { id: string; weight_kg: number; logged_at: string }
 
-export default function DashboardScreen() {
+type Props = { navigation: BottomTabNavigationProp<any> }
+
+export default function DashboardScreen({ navigation }: Props) {
   const { user } = useAuth()
   const { colors, dark } = useTheme()
   const s = makeStyles(colors)
@@ -57,6 +60,10 @@ export default function DashboardScreen() {
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
       <Text style={s.heading}>Dashboard</Text>
+
+      <TouchableOpacity style={s.logBtn} onPress={() => navigation.navigate('Log')} activeOpacity={0.85}>
+        <Text style={s.logBtnText}>+ Log Weight</Text>
+      </TouchableOpacity>
 
       <View style={s.filterRow}>
         {FILTERS.map(({ label, value }) => (
@@ -145,6 +152,13 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { flex: 1, backgroundColor: colors.bg },
     content: { padding: 16, paddingBottom: 100 },
     heading: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 16 },
+    logBtn: {
+      backgroundColor: '#2563eb', borderRadius: 14, paddingVertical: 18,
+      alignItems: 'center', marginBottom: 20,
+      shadowColor: '#2563eb', shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3, shadowRadius: 8, elevation: 6,
+    },
+    logBtnText: { color: '#fff', fontSize: 18, fontWeight: '700', letterSpacing: 0.3 },
     filterRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
     filterBtn: {
       paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
