@@ -1,17 +1,33 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { formatDate, formatWeight, toCSV, type WeightLog } from '@simple-wt/shared'
+import { formatDate, formatWeight, toCSV, getDateRange, type WeightLog, type DateFilter } from '@simple-wt/shared'
 import { createClient } from '@/lib/supabase/client'
 import LogWeightForm from '@/components/weight/LogWeightForm'
+
+type HistoryFilter = DateFilter
+const FILTERS: { label: string; value: HistoryFilter }[] = [
+  { label: 'All', value: 'all' },
+  { label: '7 days', value: '7d' },
+  { label: '30 days', value: '30d' },
+  { label: '90 days', value: '90d' },
+  { label: '1 year', value: '1y' },
+]
 
 export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
   const router = useRouter()
   const [editEntry, setEditEntry] = useState<WeightLog | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [filter, setFilter] = useState<HistoryFilter>('all')
+
+  const filtered = useMemo(() => {
+    if (filter === 'all') return logs
+    const { from, to } = getDateRange(filter)
+    return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
+  }, [logs, filter])
 
   function downloadCSV() {
     const csv = toCSV(logs)
@@ -39,17 +55,37 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
     router.refresh()
   }
 
-  if (logs.length === 0) {
-    return (
-      <div className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-12 text-center">
-        <p className="text-gray-500 dark:text-gray-400">No weight entries yet.</p>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Log your first weight to see it here.</p>
-      </div>
-    )
-  }
-
   return (
     <>
+      {/* Filter bar */}
+      <div className="flex flex-wrap gap-2 items-center mb-4">
+        {FILTERS.map(({ label, value }) => (
+          <button
+            key={value}
+            onClick={() => setFilter(value)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              filter === value
+                ? 'bg-blue-600 text-white'
+                : 'bg-white dark:bg-[#1B1D1E] border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {logs.length === 0 ? (
+        <div className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-12 text-center">
+          <p className="text-gray-500 dark:text-gray-400">No weight entries yet.</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Log your first weight to see it here.</p>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-12 text-center">
+          <p className="text-gray-500 dark:text-gray-400">No entries for this period.</p>
+        </div>
+      ) : null}
+
+      {filtered.length > 0 && <>
       <div className="flex justify-end mb-4">
         <button
           onClick={downloadCSV}
@@ -70,7 +106,7 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
-            {logs.map((log) => (
+            {filtered.map((log) => (
               <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 <td className="px-4 py-3 text-gray-900 dark:text-gray-100 font-medium">{formatDate(log.logged_at)}</td>
                 <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{formatWeight(log.weight_kg)}</td>
@@ -145,6 +181,7 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
           </div>
         </div>
       )}
+      </>}
     </>
   )
 }

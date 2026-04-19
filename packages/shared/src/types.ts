@@ -17,7 +17,7 @@ export interface WeightLog {
 export type WeightLogInsert = Pick<WeightLog, 'weight_kg' | 'logged_at' | 'notes'>
 export type WeightLogUpdate = Partial<Pick<WeightLog, 'weight_kg' | 'notes'>>
 
-export type DateFilter = '7d' | '30d' | '90d' | '1y' | 'custom'
+export type DateFilter = '7d' | '30d' | '90d' | '1y' | 'custom' | 'all'
 
 export interface DateRange {
   from: string // YYYY-MM-DD

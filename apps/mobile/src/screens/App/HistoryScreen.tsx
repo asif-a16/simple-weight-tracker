@@ -1,15 +1,24 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  Modal, Alert, ActivityIndicator,
+  Modal, Alert, ActivityIndicator, ScrollView,
 } from 'react-native'
 import * as Sharing from 'expo-sharing'
 import * as FileSystem from 'expo-file-system'
-import { formatDate, formatWeight, toCSV, type WeightLog } from '@simple-wt/shared'
+import { formatDate, formatWeight, toCSV, getDateRange, type WeightLog, type DateFilter } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 import LogScreen from './LogScreen'
+
+type HistoryFilter = DateFilter
+const FILTERS: { label: string; value: HistoryFilter }[] = [
+  { label: 'All', value: 'all' },
+  { label: '7d', value: '7d' },
+  { label: '30d', value: '30d' },
+  { label: '90d', value: '90d' },
+  { label: '1yr', value: '1y' },
+]
 
 export default function HistoryScreen() {
   const { user } = useAuth()
@@ -18,6 +27,7 @@ export default function HistoryScreen() {
   const [logs, setLogs] = useState<WeightLog[]>([])
   const [loading, setLoading] = useState(true)
   const [editEntry, setEditEntry] = useState<WeightLog | null>(null)
+  const [filter, setFilter] = useState<HistoryFilter>('all')
 
   const fetchLogs = useCallback(async () => {
     if (!user) return
@@ -31,6 +41,12 @@ export default function HistoryScreen() {
   }, [user])
 
   useEffect(() => { fetchLogs() }, [fetchLogs])
+
+  const filtered = useMemo(() => {
+    if (filter === 'all') return logs
+    const { from, to } = getDateRange(filter)
+    return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
+  }, [logs, filter])
 
   async function handleDelete(id: string) {
     Alert.alert('Delete entry?', 'This action cannot be undone.', [
@@ -58,6 +74,18 @@ export default function HistoryScreen() {
 
   return (
     <View style={s.container}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.filterScroll} contentContainerStyle={s.filterRow}>
+        {FILTERS.map(({ label, value }) => (
+          <TouchableOpacity
+            key={value}
+            onPress={() => setFilter(value)}
+            style={[s.filterBtn, filter === value && s.filterBtnActive]}
+          >
+            <Text style={[s.filterText, filter === value && s.filterTextActive]}>{label}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
       {logs.length > 0 && (
         <TouchableOpacity style={s.exportBtn} onPress={handleExport}>
           <Text style={s.exportText}>Export CSV</Text>
@@ -65,13 +93,13 @@ export default function HistoryScreen() {
       )}
 
       <FlatList
-        data={logs}
+        data={filtered}
         keyExtractor={(l) => l.id}
         contentContainerStyle={s.list}
         ListEmptyComponent={
           <View style={s.empty}>
-            <Text style={s.emptyText}>No weight entries yet.</Text>
-            <Text style={s.emptySubText}>Log your first weight to see it here.</Text>
+            <Text style={s.emptyText}>{logs.length === 0 ? 'No weight entries yet.' : 'No entries for this period.'}</Text>
+            {logs.length === 0 && <Text style={s.emptySubText}>Log your first weight to see it here.</Text>}
           </View>
         }
         renderItem={({ item }) => (
@@ -117,6 +145,15 @@ export default function HistoryScreen() {
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
+    filterScroll: { flexGrow: 0, paddingTop: 12 },
+    filterRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingBottom: 8 },
+    filterBtn: {
+      paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
+      borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
+    },
+    filterBtnActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
+    filterText: { fontSize: 13, fontWeight: '500', color: colors.text },
+    filterTextActive: { color: '#fff' },
     exportBtn: {
       margin: 16, marginBottom: 8, paddingVertical: 10, borderRadius: 10,
       borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center',
