@@ -94,6 +94,9 @@ export default function LogScreen({ initialDate, initialWeight, initialNotes, en
               keyboardType="decimal-pad"
               placeholder="e.g. 75.5"
               placeholderTextColor={colors.textSecondary}
+              autoFocus
+              returnKeyType="done"
+              onSubmitEditing={handleSubmit(onSubmit)}
             />
           )}
         />
