@@ -6,19 +6,16 @@ const workspaceRoot = path.resolve(projectRoot, '../..')
 
 const config = getDefaultConfig(projectRoot)
 
-// Watch all files in the monorepo
 config.watchFolders = [workspaceRoot]
 
-// Resolve node_modules from both the app and monorepo root
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ]
 
-// Force Metro to always use the single root copy of React
-config.resolver.extraNodeModules = {
-  react: path.resolve(workspaceRoot, 'node_modules/react'),
-  'react-native': path.resolve(workspaceRoot, 'node_modules/react-native'),
-}
+// Resolve symlinks to their real paths so pnpm's symlinked packages
+// (e.g. react appearing in both root and app node_modules) get the same
+// module ID and are not bundled twice.
+config.resolver.unstable_enableSymlinks = true
 
 module.exports = config
