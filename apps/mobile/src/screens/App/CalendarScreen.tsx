@@ -30,7 +30,7 @@ export default function CalendarScreen() {
     setLoading(false)
   }, [user])
 
-  useFocusEffect(fetchAll)
+  useFocusEffect(useCallback(() => { fetchAll() }, [fetchAll]))
 
   const logMap = new Map(logs.map((l) => [l.logged_at, l]))
 
