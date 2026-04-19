@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config *)",
+      "Bash(pnpm create *)",
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(pnpm --version)",
+      "Bash(npx pnpm *)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm --filter web add @simple-wt/shared zod @supabase/supabase-js @supabase/ssr react-hook-form @hookform/resolvers)",
+      "Bash(pnpm --filter mobile add @simple-wt/shared zod @supabase/supabase-js react-hook-form @hookform/resolvers)",
+      "Bash(pnpm --filter mobile add react-native-url-polyfill)",
+      "Bash(pnpm typecheck *)",
+      "Bash(xargs head *)",
+      "Bash(node -e \"const ts = require\\('typescript'\\); const host = ts.createCompilerHost\\({}\\); console.log\\(host.resolveModuleNames\\); const result = ts.resolveModuleName\\('@simple-wt/shared', 'C:/Users/a/Documents/repos/simple-weight-tracker/apps/web/lib/supabase/client.ts', {moduleResolution: ts.ModuleResolutionKind.Bundler, paths: {'@simple-wt/shared': ['../../packages/shared/src/index.ts']}}, host\\); console.log\\(JSON.stringify\\(result, null, 2\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k,v\\) for k,v in d.get\\('exports',{}\\).items\\(\\)]\")",
+      "Bash(pnpm --filter web add @supabase/supabase-js@2.49.4 @supabase/ssr@0.5.2)"
+    ]
+  }
+}
