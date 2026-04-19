@@ -102,7 +102,7 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-lg font-semibold">Edit Entry</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Edit Entry</h2>
               <button onClick={() => setEditEntry(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
             </div>
             <div className="p-6">

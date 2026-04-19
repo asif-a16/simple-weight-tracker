@@ -112,7 +112,7 @@ export default function CalendarClient({ logs, accountCreatedAt }: Props) {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-lg font-semibold text-gray-900">
                 {modalEntry ? `Edit — ${modalDate}` : `Log weight — ${modalDate}`}
               </h2>
               <button onClick={() => setModalDate(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
