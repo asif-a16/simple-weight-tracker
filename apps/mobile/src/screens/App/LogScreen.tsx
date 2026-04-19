@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert,
@@ -16,9 +16,10 @@ interface Props {
   entryId?: string
   onSuccess?: () => void
   showHeading?: boolean
+  weightInputRef?: React.RefObject<TextInput>
 }
 
-export default function LogScreen({ initialDate, initialWeight, initialNotes, entryId, onSuccess, showHeading = false }: Props) {
+export default function LogScreen({ initialDate, initialWeight, initialNotes, entryId, onSuccess, showHeading = false, weightInputRef }: Props) {
   const today = new Date().toISOString().slice(0, 10)
   const [serverError, setServerError] = useState<string | null>(null)
   const { colors } = useTheme()
@@ -89,6 +90,7 @@ export default function LogScreen({ initialDate, initialWeight, initialNotes, en
           name="weight_kg"
           render={({ field: { onChange, value } }) => (
             <TextInput
+              ref={weightInputRef}
               style={[s.input, errors.weight_kg && s.inputError]}
               onChangeText={(t) => onChange(t ? parseFloat(t) : undefined)}
               value={value?.toString() ?? ''}

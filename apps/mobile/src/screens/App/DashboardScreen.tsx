@@ -59,11 +59,8 @@ export default function DashboardScreen({ navigation }: Props) {
   const tickColor = dark ? '#9CA3AF' : '#9ca3af'
 
   return (
+    <View style={s.outer}>
     <ScrollView style={s.container} contentContainerStyle={s.content}>
-      <TouchableOpacity style={s.logBtn} onPress={() => navigation.navigate('Log')} activeOpacity={0.85}>
-        <Text style={s.logBtnText}>+ Log Weight</Text>
-      </TouchableOpacity>
-
       <View style={s.filterRow}>
         {FILTERS.map(({ label, value }) => (
           <TouchableOpacity
@@ -143,17 +140,25 @@ export default function DashboardScreen({ navigation }: Props) {
         </View>
       )}
     </ScrollView>
+
+    <View style={s.bottomBar}>
+      <TouchableOpacity style={s.logBtn} onPress={() => navigation.navigate('Log')} activeOpacity={0.85}>
+        <Text style={s.logBtnText}>+ Log Weight</Text>
+      </TouchableOpacity>
+    </View>
+    </View>
   )
 }
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.bg },
-    content: { padding: 16, paddingBottom: 100 },
-    heading: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 16 },
+    outer: { flex: 1, backgroundColor: colors.bg },
+    container: { flex: 1 },
+    content: { padding: 16, paddingBottom: 16 },
+    bottomBar: { padding: 16, paddingBottom: 24, backgroundColor: colors.bg },
     logBtn: {
       backgroundColor: '#2563eb', borderRadius: 14, paddingVertical: 18,
-      alignItems: 'center', marginBottom: 20,
+      alignItems: 'center',
       shadowColor: '#2563eb', shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3, shadowRadius: 8, elevation: 6,
     },

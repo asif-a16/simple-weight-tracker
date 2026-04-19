@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useRef, useCallback } from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { useFocusEffect } from '@react-navigation/native'
 import { StatusBar } from 'expo-status-bar'
-import { ActivityIndicator, TouchableOpacity, Text, View } from 'react-native'
+import { ActivityIndicator, TouchableOpacity, Text, View, TextInput } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { ThemeProvider, useTheme } from './src/context/ThemeContext'
 import { AuthProvider, useAuth } from './src/context/AuthContext'
@@ -24,6 +25,15 @@ function AuthNavigator() {
       <AuthStack.Screen name="Register" component={RegisterScreen} />
     </AuthStack.Navigator>
   )
+}
+
+function LogTabScreen() {
+  const weightInputRef = useRef<TextInput>(null)
+  useFocusEffect(useCallback(() => {
+    const t = setTimeout(() => weightInputRef.current?.focus(), 100)
+    return () => clearTimeout(t)
+  }, []))
+  return <LogScreen weightInputRef={weightInputRef} />
 }
 
 function DarkModeToggle() {
@@ -60,7 +70,7 @@ function AppNavigator() {
       })}
     >
       <AppTab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Dashboard' }} />
-      <AppTab.Screen name="Log" component={LogScreen} options={{ title: 'Log Weight' }} />
+      <AppTab.Screen name="Log" component={LogTabScreen} options={{ title: 'Log Weight' }} />
       <AppTab.Screen name="History" component={HistoryScreen} options={{ title: 'History' }} />
       <AppTab.Screen name="Calendar" component={CalendarScreen} options={{ title: 'Calendar' }} />
     </AppTab.Navigator>
