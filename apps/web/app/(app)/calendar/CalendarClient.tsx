@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { formatWeight, type WeightLog } from '@simple-wt/shared'
+import { type WeightLog } from '@simple-wt/shared'
 import LogWeightForm from '@/components/weight/LogWeightForm'
 
 interface Props {
