@@ -22,7 +22,7 @@ export default function CalendarClient({ logs, accountCreatedAt }: Props) {
 
   const logMap = new Map(logs.map((l) => [l.logged_at, l]))
   const today = now.toISOString().slice(0, 10)
-  const minDate = accountCreatedAt.slice(0, 7) // YYYY-MM
+  const minDate = accountCreatedAt.slice(0, 7)
 
   const currentMonth = `${year}-${String(month + 1).padStart(2, '0')}`
 
@@ -38,7 +38,6 @@ export default function CalendarClient({ logs, accountCreatedAt }: Props) {
     else setMonth((m) => m + 1)
   }
 
-  // Build calendar grid
   const firstDay = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const cells: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)]
@@ -47,22 +46,22 @@ export default function CalendarClient({ logs, accountCreatedAt }: Props) {
 
   return (
     <>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
           <button
             onClick={prevMonth}
             disabled={currentMonth <= minDate}
-            className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-700 dark:text-gray-300"
             aria-label="Previous month"
           >
             ‹
           </button>
-          <span className="font-semibold text-gray-900">{MONTHS[month]} {year}</span>
+          <span className="font-semibold text-gray-900 dark:text-gray-100">{MONTHS[month]} {year}</span>
           <button
             onClick={nextMonth}
             disabled={year === now.getFullYear() && month >= now.getMonth()}
-            className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-700 dark:text-gray-300"
             aria-label="Next month"
           >
             ›
@@ -70,9 +69,9 @@ export default function CalendarClient({ logs, accountCreatedAt }: Props) {
         </div>
 
         {/* Day labels */}
-        <div className="grid grid-cols-7 border-b border-gray-100">
+        <div className="grid grid-cols-7 border-b border-gray-100 dark:border-gray-700">
           {DAYS.map((d) => (
-            <div key={d} className="py-2 text-center text-xs font-medium text-gray-400">{d}</div>
+            <div key={d} className="py-2 text-center text-xs font-medium text-gray-400 dark:text-gray-500">{d}</div>
           ))}
         </div>
 
@@ -92,14 +91,14 @@ export default function CalendarClient({ logs, accountCreatedAt }: Props) {
                 disabled={isFuture}
                 aria-label={`${dateStr}${entry ? `: ${entry.weight_kg} kg` : ''}`}
                 className={`aspect-square flex flex-col items-center justify-center text-sm transition-colors ${
-                  isFuture ? 'text-gray-200 cursor-default' :
-                  entry ? 'bg-blue-50 hover:bg-blue-100 text-blue-700' :
-                  'hover:bg-gray-50 text-gray-700'
+                  isFuture ? 'text-gray-200 dark:text-gray-700 cursor-default' :
+                  entry ? 'bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400' :
+                  'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                 } ${isToday ? 'ring-2 ring-inset ring-blue-400' : ''}`}
               >
                 <span className="font-medium">{day}</span>
                 {entry && (
-                  <span className="text-xs text-blue-500 leading-tight">{formatWeight(entry.weight_kg)}</span>
+                  <span className="text-xs text-blue-500 dark:text-blue-400 leading-tight">{formatWeight(entry.weight_kg)}</span>
                 )}
               </button>
             )
@@ -110,12 +109,12 @@ export default function CalendarClient({ logs, accountCreatedAt }: Props) {
       {/* Modal: log or edit */}
       {modalDate && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">
+          <div className="bg-white dark:bg-[#1B1D1E] rounded-2xl w-full max-w-md shadow-xl">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 {modalEntry ? `Edit — ${modalDate}` : `Log weight — ${modalDate}`}
               </h2>
-              <button onClick={() => setModalDate(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+              <button onClick={() => setModalDate(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">×</button>
             </div>
             <div className="p-6">
               <LogWeightForm

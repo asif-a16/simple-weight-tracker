@@ -41,14 +41,14 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#181A1B] px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Weight Tracker</h1>
-          <p className="mt-2 text-gray-600">Create your account</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Weight Tracker</h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">Create your account</p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4 bg-white dark:bg-[#1B1D1E] p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           {serverError && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
               {serverError}
@@ -56,7 +56,7 @@ export default function RegisterPage() {
           )}
 
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Full name
             </label>
             <input
@@ -64,7 +64,7 @@ export default function RegisterPage() {
               id="name"
               type="text"
               autoComplete="name"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-[#181A1B] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Alex Smith"
             />
             {errors.name && (
@@ -73,7 +73,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Email
             </label>
             <input
@@ -81,7 +81,7 @@ export default function RegisterPage() {
               id="email"
               type="email"
               autoComplete="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-[#181A1B] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="you@example.com"
             />
             {errors.email && (
@@ -90,7 +90,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Password
             </label>
             <input
@@ -98,7 +98,7 @@ export default function RegisterPage() {
               id="password"
               type="password"
               autoComplete="new-password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-[#181A1B] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Min. 8 characters"
             />
             {errors.password && (
@@ -114,7 +114,7 @@ export default function RegisterPage() {
             {isSubmitting ? 'Creating account…' : 'Create account'}
           </button>
 
-          <p className="text-center text-sm text-gray-600">
+          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{' '}
             <Link href="/login" className="text-blue-600 hover:underline font-medium">
               Sign in

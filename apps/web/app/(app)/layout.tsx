@@ -15,7 +15,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .single()
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#181A1B] flex">
       <AppNav userName={profile?.name ?? 'User'} />
       <main className="flex-1 p-6 lg:p-8 overflow-y-auto pb-20 lg:pb-8">
         {children}

@@ -41,9 +41,9 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
 
   if (logs.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
-        <p className="text-gray-500">No weight entries yet.</p>
-        <p className="text-sm text-gray-400 mt-1">Log your first weight to see it here.</p>
+      <div className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-12 text-center">
+        <p className="text-gray-500 dark:text-gray-400">No weight entries yet.</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Log your first weight to see it here.</p>
       </div>
     )
   }
@@ -53,28 +53,28 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
       <div className="flex justify-end mb-4">
         <button
           onClick={downloadCSV}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-[#1B1D1E] border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
         >
           Export CSV
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-100">
+          <thead className="bg-gray-50 dark:bg-[#181A1B] border-b border-gray-100 dark:border-gray-700">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">Date</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">Weight</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600 hidden sm:table-cell">Notes</th>
-              <th className="px-4 py-3 text-right font-medium text-gray-600">Actions</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Date</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Weight</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 hidden sm:table-cell">Notes</th>
+              <th className="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
             {logs.map((log) => (
-              <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 text-gray-900 font-medium">{formatDate(log.logged_at)}</td>
-                <td className="px-4 py-3 text-gray-900">{formatWeight(log.weight_kg)}</td>
-                <td className="px-4 py-3 text-gray-500 hidden sm:table-cell max-w-xs truncate">
+              <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <td className="px-4 py-3 text-gray-900 dark:text-gray-100 font-medium">{formatDate(log.logged_at)}</td>
+                <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{formatWeight(log.weight_kg)}</td>
+                <td className="px-4 py-3 text-gray-500 dark:text-gray-400 hidden sm:table-cell max-w-xs truncate">
                   {log.notes ?? '—'}
                 </td>
                 <td className="px-4 py-3 text-right space-x-2">
@@ -100,10 +100,10 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
       {/* Edit modal */}
       {editEntry && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">Edit Entry</h2>
-              <button onClick={() => setEditEntry(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+          <div className="bg-white dark:bg-[#1B1D1E] rounded-2xl w-full max-w-md shadow-xl">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Entry</h2>
+              <button onClick={() => setEditEntry(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">×</button>
             </div>
             <div className="p-6">
               <LogWeightForm
@@ -124,13 +124,13 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
       {/* Delete confirmation dialog */}
       {deleteId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900">Delete entry?</h2>
-            <p className="text-sm text-gray-600">This action cannot be undone.</p>
+          <div className="bg-white dark:bg-[#1B1D1E] rounded-2xl w-full max-w-sm shadow-xl p-6 space-y-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete entry?</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">This action cannot be undone.</p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setDeleteId(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-[#181A1B] border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Cancel
               </button>

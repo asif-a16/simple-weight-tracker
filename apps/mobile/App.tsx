@@ -3,7 +3,8 @@ import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { StatusBar } from 'expo-status-bar'
-import { ActivityIndicator, View } from 'react-native'
+import { ActivityIndicator, TouchableOpacity, Text, View } from 'react-native'
+import { ThemeProvider, useTheme } from './src/context/ThemeContext'
 import { AuthProvider, useAuth } from './src/context/AuthContext'
 import LoginScreen from './src/screens/Auth/LoginScreen'
 import RegisterScreen from './src/screens/Auth/RegisterScreen'
@@ -24,15 +25,27 @@ function AuthNavigator() {
   )
 }
 
+function DarkModeToggle() {
+  const { dark, toggle } = useTheme()
+  return (
+    <TouchableOpacity onPress={toggle} style={{ marginRight: 16 }}>
+      <Text style={{ fontSize: 18 }}>{dark ? '☀' : '☾'}</Text>
+    </TouchableOpacity>
+  )
+}
+
 function AppNavigator() {
+  const { colors, dark } = useTheme()
   return (
     <AppTab.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#2563eb',
-        tabBarInactiveTintColor: '#9ca3af',
-        tabBarStyle: { borderTopColor: '#e5e7eb' },
-        headerStyle: { backgroundColor: '#fff' },
+        tabBarInactiveTintColor: dark ? '#6B7280' : '#9ca3af',
+        tabBarStyle: { borderTopColor: colors.border, backgroundColor: colors.surface },
+        headerStyle: { backgroundColor: colors.surface },
+        headerTintColor: colors.text,
         headerShadowVisible: false,
+        headerRight: () => <DarkModeToggle />,
       }}
     >
       <AppTab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Dashboard' }} />
@@ -45,9 +58,10 @@ function AppNavigator() {
 
 function RootNavigator() {
   const { user, loading } = useAuth()
+  const { colors } = useTheme()
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg }}>
         <ActivityIndicator size="large" color="#2563eb" />
       </View>
     )
@@ -57,11 +71,20 @@ function RootNavigator() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <StatusBar style="dark" />
-        <RootNavigator />
-      </NavigationContainer>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
+  )
+}
+
+function AppContent() {
+  const { dark } = useTheme()
+  return (
+    <NavigationContainer>
+      <StatusBar style={dark ? 'light' : 'dark'} />
+      <RootNavigator />
+    </NavigationContainer>
   )
 }

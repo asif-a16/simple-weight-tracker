@@ -71,8 +71,10 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
     onSuccess?.()
   }
 
+  const inputClass = 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-[#181A1B] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-white dark:bg-[#1B1D1E] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
       {serverError && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
           {serverError}
@@ -80,7 +82,7 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
       )}
 
       <div>
-        <label htmlFor="logged_at" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="logged_at" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Date
         </label>
         <input
@@ -88,7 +90,7 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
           id="logged_at"
           type="date"
           max={today}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className={inputClass}
         />
         {errors.logged_at && (
           <p className="mt-1 text-sm text-red-600">{errors.logged_at.message}</p>
@@ -96,7 +98,7 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
       </div>
 
       <div>
-        <label htmlFor="weight_kg" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="weight_kg" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Weight (kg)
         </label>
         <input
@@ -106,7 +108,7 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
           step="0.01"
           min="1"
           max="999"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className={inputClass}
           placeholder="e.g. 75.5"
         />
         {errors.weight_kg && (
@@ -115,7 +117,7 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
       </div>
 
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Notes <span className="text-gray-400 font-normal">(optional)</span>
         </label>
         <textarea
@@ -123,7 +125,7 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
           id="notes"
           rows={3}
           maxLength={500}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          className={`${inputClass} resize-none`}
           placeholder="How are you feeling today?"
         />
         {errors.notes && (

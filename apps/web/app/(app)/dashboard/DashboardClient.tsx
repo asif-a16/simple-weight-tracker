@@ -63,7 +63,7 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
               filter === value
                 ? 'bg-blue-600 text-white'
-                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                : 'bg-white dark:bg-[#1B1D1E] border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
             {label}
@@ -77,44 +77,44 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
               value={customFrom}
               max={customTo || today}
               onChange={(e) => setCustomFrom(e.target.value)}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#1B1D1E] focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <span className="text-gray-500 text-sm">to</span>
+            <span className="text-gray-500 dark:text-gray-400 text-sm">to</span>
             <input
               type="date"
               value={customTo}
               min={customFrom}
               max={today}
               onChange={(e) => setCustomTo(e.target.value)}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#1B1D1E] focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         )}
       </div>
 
       {/* Chart */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <div className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
         {chartData.length === 0 ? (
           <div className="h-64 flex items-center justify-center">
-            <p className="text-gray-400">No data for this period</p>
+            <p className="text-gray-400 dark:text-gray-500">No data for this period</p>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
               <XAxis
                 dataKey="date"
                 tickFormatter={(d: string) => {
                   const [, m, day] = d.split('-')
                   return `${day}/${m}`
                 }}
-                tick={{ fontSize: 12, fill: '#6b7280' }}
+                tick={{ fontSize: 12, fill: '#9ca3af' }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
                 domain={[Math.floor(minW - padding), Math.ceil(maxW + padding)]}
-                tick={{ fontSize: 12, fill: '#6b7280' }}
+                tick={{ fontSize: 12, fill: '#9ca3af' }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v: number) => `${v}`}
@@ -125,8 +125,8 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
                   if (!active || !payload?.length) return null
                   const d = payload[0].payload
                   return (
-                    <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg text-sm">
-                      <p className="font-medium text-gray-900">{d.label}</p>
+                    <div className="bg-white dark:bg-[#1B1D1E] border border-gray-200 dark:border-gray-700 rounded-lg p-3 shadow-lg text-sm">
+                      <p className="font-medium text-gray-900 dark:text-gray-100">{d.label}</p>
                       <p className="text-blue-600 font-semibold">{formatWeight(d.weight)}</p>
                     </div>
                   )
@@ -154,9 +154,9 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
             { label: 'Min', value: formatWeight(Math.min(...weights)) },
             { label: 'Max', value: formatWeight(Math.max(...weights)) },
           ].map(({ label, value }) => (
-            <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">{value}</p>
-              <p className="text-sm text-gray-500 mt-1">{label}</p>
+            <div key={label} className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 text-center">
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{label}</p>
             </div>
           ))}
         </div>

@@ -4,10 +4,13 @@ import { Calendar } from 'react-native-calendars'
 import type { WeightLog } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../context/ThemeContext'
 import LogScreen from './LogScreen'
 
 export default function CalendarScreen() {
   const { user } = useAuth()
+  const { colors, dark } = useTheme()
+  const s = makeStyles(colors)
   const [logs, setLogs] = useState<WeightLog[]>([])
   const [minDate, setMinDate] = useState<string>('')
   const [loading, setLoading] = useState(true)
@@ -42,7 +45,7 @@ export default function CalendarScreen() {
   if (loading) return <ActivityIndicator style={{ flex: 1 }} />
 
   return (
-    <View style={styles.container}>
+    <View style={s.container}>
       <Calendar
         maxDate={today}
         minDate={minDate}
@@ -52,18 +55,27 @@ export default function CalendarScreen() {
           setModalDate(day.dateString)
         }}
         theme={{
+          calendarBackground: colors.surface,
+          backgroundColor: colors.surface,
+          textSectionTitleColor: colors.textSecondary,
+          dayTextColor: colors.text,
           todayTextColor: '#2563eb',
           selectedDayBackgroundColor: '#2563eb',
+          selectedDayTextColor: '#ffffff',
           arrowColor: '#2563eb',
           dotColor: '#2563eb',
+          monthTextColor: colors.text,
+          textDisabledColor: dark ? '#4B5563' : '#D1D5DB',
+          textDayFontWeight: '400',
+          textMonthFontWeight: '600',
         }}
       />
 
       <Modal visible={!!modalDate} animationType="slide" presentationStyle="pageSheet">
         {modalDate && (
-          <View style={{ flex: 1 }}>
-            <TouchableOpacity style={styles.closeBtn} onPress={() => setModalDate(null)}>
-              <Text style={styles.closeBtnText}>Cancel</Text>
+          <View style={{ flex: 1, backgroundColor: colors.bg }}>
+            <TouchableOpacity style={s.closeBtn} onPress={() => setModalDate(null)}>
+              <Text style={s.closeBtnText}>Cancel</Text>
             </TouchableOpacity>
             <LogScreen
               entryId={modalEntry?.id}
@@ -79,8 +91,10 @@ export default function CalendarScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb', paddingTop: 8 },
-  closeBtn: { padding: 16 },
-  closeBtnText: { color: '#2563eb', fontSize: 16 },
-})
+function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg, paddingTop: 8 },
+    closeBtn: { padding: 16 },
+    closeBtnText: { color: '#2563eb', fontSize: 16 },
+  })
+}

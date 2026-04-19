@@ -7,6 +7,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { weightLogSchema, type WeightLogInput, sanitizeNotes } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
+import { useTheme } from '../../context/ThemeContext'
 
 interface Props {
   initialDate?: string
@@ -19,6 +20,8 @@ interface Props {
 export default function LogScreen({ initialDate, initialWeight, initialNotes, entryId, onSuccess }: Props) {
   const today = new Date().toISOString().slice(0, 10)
   const [serverError, setServerError] = useState<string | null>(null)
+  const { colors } = useTheme()
+  const s = makeStyles(colors)
 
   const { control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<WeightLogInput>({
     resolver: zodResolver(weightLogSchema),
@@ -56,101 +59,103 @@ export default function LogScreen({ initialDate, initialWeight, initialNotes, en
   }
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <Text style={styles.heading}>{entryId ? 'Edit Entry' : 'Log Weight'}</Text>
+    <KeyboardAvoidingView style={s.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView contentContainerStyle={s.container} keyboardShouldPersistTaps="handled">
+        <Text style={s.heading}>{entryId ? 'Edit Entry' : 'Log Weight'}</Text>
 
-        {serverError && <Text style={styles.serverError}>{serverError}</Text>}
+        {serverError && <Text style={s.serverError}>{serverError}</Text>}
 
-        <Text style={styles.label}>Date</Text>
+        <Text style={s.label}>Date</Text>
         <Controller
           control={control}
           name="logged_at"
           render={({ field: { onChange, value } }) => (
             <TextInput
-              style={[styles.input, errors.logged_at && styles.inputError]}
+              style={[s.input, errors.logged_at && s.inputError]}
               onChangeText={onChange}
               value={value}
               placeholder="YYYY-MM-DD"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={colors.textSecondary}
               maxLength={10}
             />
           )}
         />
-        {errors.logged_at && <Text style={styles.fieldError}>{errors.logged_at.message}</Text>}
+        {errors.logged_at && <Text style={s.fieldError}>{errors.logged_at.message}</Text>}
 
-        <Text style={styles.label}>Weight (kg)</Text>
+        <Text style={s.label}>Weight (kg)</Text>
         <Controller
           control={control}
           name="weight_kg"
           render={({ field: { onChange, value } }) => (
             <TextInput
-              style={[styles.input, errors.weight_kg && styles.inputError]}
+              style={[s.input, errors.weight_kg && s.inputError]}
               onChangeText={(t) => onChange(t ? parseFloat(t) : undefined)}
               value={value?.toString() ?? ''}
               keyboardType="decimal-pad"
               placeholder="e.g. 75.5"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={colors.textSecondary}
             />
           )}
         />
-        {errors.weight_kg && <Text style={styles.fieldError}>{errors.weight_kg.message}</Text>}
+        {errors.weight_kg && <Text style={s.fieldError}>{errors.weight_kg.message}</Text>}
 
-        <Text style={styles.label}>Notes <Text style={styles.optional}>(optional)</Text></Text>
+        <Text style={s.label}>Notes <Text style={s.optional}>(optional)</Text></Text>
         <Controller
           control={control}
           name="notes"
           render={({ field: { onChange, value } }) => (
             <TextInput
-              style={[styles.input, styles.textarea, errors.notes && styles.inputError]}
+              style={[s.input, s.textarea, errors.notes && s.inputError]}
               onChangeText={onChange}
               value={value ?? ''}
               multiline
               numberOfLines={3}
               maxLength={500}
               placeholder="How are you feeling today?"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={colors.textSecondary}
               textAlignVertical="top"
             />
           )}
         />
 
         <TouchableOpacity
-          style={[styles.btn, isSubmitting && styles.btnDisabled]}
+          style={[s.btn, isSubmitting && s.btnDisabled]}
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
         >
           {isSubmitting
             ? <ActivityIndicator color="#fff" />
-            : <Text style={styles.btnText}>{entryId ? 'Update entry' : 'Log weight'}</Text>}
+            : <Text style={s.btnText}>{entryId ? 'Update entry' : 'Log weight'}</Text>}
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   )
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#f9fafb' },
-  container: { flexGrow: 1, padding: 20 },
-  heading: { fontSize: 24, fontWeight: '700', color: '#111827', marginBottom: 24 },
-  label: { fontSize: 14, fontWeight: '500', color: '#374151', marginBottom: 6 },
-  optional: { color: '#9ca3af', fontWeight: '400' },
-  input: {
-    borderWidth: 1, borderColor: '#d1d5db', borderRadius: 10,
-    paddingHorizontal: 14, paddingVertical: 12, fontSize: 16,
-    backgroundColor: '#fff', color: '#111827', marginBottom: 4,
-  },
-  textarea: { height: 80 },
-  inputError: { borderColor: '#ef4444' },
-  fieldError: { fontSize: 13, color: '#ef4444', marginBottom: 12 },
-  serverError: {
-    backgroundColor: '#fef2f2', borderColor: '#fecaca', borderWidth: 1,
-    borderRadius: 8, padding: 12, color: '#dc2626', fontSize: 14, marginBottom: 16,
-  },
-  btn: {
-    backgroundColor: '#2563eb', borderRadius: 10, paddingVertical: 14,
-    alignItems: 'center', marginTop: 16,
-  },
-  btnDisabled: { backgroundColor: '#93c5fd' },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-})
+function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    flex: { flex: 1, backgroundColor: colors.bg },
+    container: { flexGrow: 1, padding: 20 },
+    heading: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 24 },
+    label: { fontSize: 14, fontWeight: '500', color: colors.text, marginBottom: 6 },
+    optional: { color: colors.textSecondary, fontWeight: '400' },
+    input: {
+      borderWidth: 1, borderColor: colors.border, borderRadius: 10,
+      paddingHorizontal: 14, paddingVertical: 12, fontSize: 16,
+      backgroundColor: colors.inputBg, color: colors.text, marginBottom: 4,
+    },
+    textarea: { height: 80 },
+    inputError: { borderColor: '#ef4444' },
+    fieldError: { fontSize: 13, color: '#ef4444', marginBottom: 12 },
+    serverError: {
+      backgroundColor: '#fef2f2', borderColor: '#fecaca', borderWidth: 1,
+      borderRadius: 8, padding: 12, color: '#dc2626', fontSize: 14, marginBottom: 16,
+    },
+    btn: {
+      backgroundColor: '#2563eb', borderRadius: 10, paddingVertical: 14,
+      alignItems: 'center', marginTop: 16,
+    },
+    btnDisabled: { backgroundColor: '#93c5fd' },
+    btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  })
+}

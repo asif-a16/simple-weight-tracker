@@ -4,9 +4,10 @@ import {
   Dimensions, ActivityIndicator,
 } from 'react-native'
 import { VictoryLine, VictoryChart, VictoryAxis, VictoryScatter, VictoryTooltip, VictoryVoronoiContainer } from 'victory-native'
-import { getDateRange, formatDate, type DateFilter } from '@simple-wt/shared'
+import { getDateRange, formatDate, formatWeight, type DateFilter } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../context/ThemeContext'
 
 type FilterOption = { label: string; value: DateFilter }
 const FILTERS: FilterOption[] = [
@@ -20,6 +21,8 @@ interface LogEntry { id: string; weight_kg: number; logged_at: string }
 
 export default function DashboardScreen() {
   const { user } = useAuth()
+  const { colors, dark } = useTheme()
+  const s = makeStyles(colors)
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [filter, setFilter] = useState<DateFilter>('30d')
   const [loading, setLoading] = useState(true)
@@ -48,31 +51,31 @@ export default function DashboardScreen() {
   const maxW = weights.length ? Math.max(...weights) : 100
   const pad = (maxW - minW) * 0.1 || 5
   const screenWidth = Dimensions.get('window').width
+  const gridColor = dark ? '#374151' : '#f3f4f6'
+  const tickColor = dark ? '#9CA3AF' : '#9ca3af'
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.heading}>Dashboard</Text>
+    <ScrollView style={s.container} contentContainerStyle={s.content}>
+      <Text style={s.heading}>Dashboard</Text>
 
-      {/* Filter buttons */}
-      <View style={styles.filterRow}>
+      <View style={s.filterRow}>
         {FILTERS.map(({ label, value }) => (
           <TouchableOpacity
             key={value}
             onPress={() => setFilter(value)}
-            style={[styles.filterBtn, filter === value && styles.filterBtnActive]}
+            style={[s.filterBtn, filter === value && s.filterBtnActive]}
           >
-            <Text style={[styles.filterText, filter === value && styles.filterTextActive]}>{label}</Text>
+            <Text style={[s.filterText, filter === value && s.filterTextActive]}>{label}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* Chart */}
-      <View style={styles.card}>
+      <View style={s.card}>
         {loading ? (
           <ActivityIndicator style={{ height: 200 }} />
         ) : chartData.length === 0 ? (
-          <View style={styles.empty}>
-            <Text style={styles.emptyText}>No data for this period</Text>
+          <View style={s.empty}>
+            <Text style={s.emptyText}>No data for this period</Text>
           </View>
         ) : (
           <VictoryChart
@@ -82,13 +85,18 @@ export default function DashboardScreen() {
             containerComponent={
               <VictoryVoronoiContainer
                 voronoiDimension="x"
-                labels={({ datum }) => `${datum.y} kg\n${formatDate(datum.x)}`}
-                labelComponent={<VictoryTooltip flyoutStyle={{ fill: '#fff', stroke: '#e5e7eb' }} style={{ fontSize: 11 }} />}
+                labels={({ datum }) => `${formatWeight(datum.y)}\n${formatDate(datum.x)}`}
+                labelComponent={
+                  <VictoryTooltip
+                    flyoutStyle={{ fill: colors.surface, stroke: colors.border }}
+                    style={{ fontSize: 11, fill: colors.text }}
+                  />
+                }
               />
             }
           >
             <VictoryAxis
-              style={{ tickLabels: { fontSize: 10, fill: '#9ca3af' }, axis: { stroke: 'none' }, grid: { stroke: '#f3f4f6' } }}
+              style={{ tickLabels: { fontSize: 10, fill: tickColor }, axis: { stroke: 'none' }, grid: { stroke: gridColor } }}
               tickFormat={(d: string) => {
                 const [, m, day] = d.split('-')
                 return `${day}/${m}`
@@ -98,7 +106,7 @@ export default function DashboardScreen() {
             <VictoryAxis
               dependentAxis
               domain={[minW - pad, maxW + pad]}
-              style={{ tickLabels: { fontSize: 10, fill: '#9ca3af' }, axis: { stroke: 'none' }, grid: { stroke: '#f3f4f6' } }}
+              style={{ tickLabels: { fontSize: 10, fill: tickColor }, axis: { stroke: 'none' }, grid: { stroke: gridColor } }}
             />
             <VictoryLine
               data={chartData}
@@ -108,23 +116,22 @@ export default function DashboardScreen() {
             <VictoryScatter
               data={chartData}
               size={4}
-              style={{ data: { fill: '#2563eb', stroke: '#fff', strokeWidth: 2 } }}
+              style={{ data: { fill: '#2563eb', stroke: colors.surface, strokeWidth: 2 } }}
             />
           </VictoryChart>
         )}
       </View>
 
-      {/* Stats */}
       {filtered.length > 0 && (
-        <View style={styles.statsRow}>
+        <View style={s.statsRow}>
           {[
             { label: 'Entries', value: filtered.length.toString() },
-            { label: 'Min', value: `${Math.min(...weights).toFixed(1)} kg` },
-            { label: 'Max', value: `${Math.max(...weights).toFixed(1)} kg` },
+            { label: 'Min', value: formatWeight(Math.min(...weights)) },
+            { label: 'Max', value: formatWeight(Math.max(...weights)) },
           ].map(({ label, value }) => (
-            <View key={label} style={styles.statCard}>
-              <Text style={styles.statValue}>{value}</Text>
-              <Text style={styles.statLabel}>{label}</Text>
+            <View key={label} style={s.statCard}>
+              <Text style={s.statValue}>{value}</Text>
+              <Text style={s.statLabel}>{label}</Text>
             </View>
           ))}
         </View>
@@ -133,31 +140,33 @@ export default function DashboardScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
-  content: { padding: 16, paddingBottom: 100 },
-  heading: { fontSize: 24, fontWeight: '700', color: '#111827', marginBottom: 16 },
-  filterRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  filterBtn: {
-    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
-    borderWidth: 1, borderColor: '#d1d5db', backgroundColor: '#fff',
-  },
-  filterBtnActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-  filterText: { fontSize: 13, fontWeight: '500', color: '#374151' },
-  filterTextActive: { color: '#fff' },
-  card: {
-    backgroundColor: '#fff', borderRadius: 16, padding: 12,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05, shadowRadius: 4, elevation: 2, marginBottom: 16,
-  },
-  empty: { height: 200, justifyContent: 'center', alignItems: 'center' },
-  emptyText: { color: '#9ca3af', fontSize: 15 },
-  statsRow: { flexDirection: 'row', gap: 12 },
-  statCard: {
-    flex: 1, backgroundColor: '#fff', borderRadius: 12, padding: 16, alignItems: 'center',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
-  },
-  statValue: { fontSize: 20, fontWeight: '700', color: '#111827' },
-  statLabel: { fontSize: 12, color: '#6b7280', marginTop: 2 },
-})
+function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    content: { padding: 16, paddingBottom: 100 },
+    heading: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 16 },
+    filterRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+    filterBtn: {
+      paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
+      borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
+    },
+    filterBtnActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
+    filterText: { fontSize: 13, fontWeight: '500', color: colors.text },
+    filterTextActive: { color: '#fff' },
+    card: {
+      backgroundColor: colors.surface, borderRadius: 16, padding: 12,
+      shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05, shadowRadius: 4, elevation: 2, marginBottom: 16,
+    },
+    empty: { height: 200, justifyContent: 'center', alignItems: 'center' },
+    emptyText: { color: colors.textSecondary, fontSize: 15 },
+    statsRow: { flexDirection: 'row', gap: 12 },
+    statCard: {
+      flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 16, alignItems: 'center',
+      shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
+    },
+    statValue: { fontSize: 20, fontWeight: '700', color: colors.text },
+    statLabel: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  })
+}
