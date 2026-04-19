@@ -49,7 +49,6 @@ export default function CalendarScreen() {
     <View style={s.container}>
       <Calendar
         maxDate={today}
-        minDate={minDate}
         markedDates={markedDates}
         onDayPress={(day) => {
           if (day.dateString > today) return
