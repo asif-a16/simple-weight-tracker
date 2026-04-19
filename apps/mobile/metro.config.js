@@ -16,15 +16,33 @@ config.resolver.nodeModulesPaths = [
 // Resolve symlinks to real paths so pnpm's symlinked packages share one module ID.
 config.resolver.unstable_enableSymlinks = true
 
-// Force React imports to always resolve from the workspace root regardless of
-// which package triggers the import. This prevents duplicate React instances
-// in a pnpm monorepo where both root and app node_modules contain React symlinks.
-const FORCE_ROOT = ['react', 'react/jsx-runtime', 'react/jsx-dev-runtime']
+// pnpm (node-linker=hoisted) installs real copies of packages in both root
+// and app node_modules. Metro treats each path as a distinct module, creating
+// duplicate singletons that break the app:
+//   react            → two schedulers  → "Invalid hook call"
+//   react-native     → two ViewConfigRegistries → "RNSVGRect undefined"
+//   react-native-svg → registers in one registry, Fabric reads the other
+//
+// Fix: force the EXACT main entry of each package to root so every importer
+// shares one instance. We only redirect the bare package name — NOT subpaths
+// like react-native/Libraries/… — so Metro's own platform-aware resolver
+// still picks .android.js/.native.js variants for internal requires.
+const FORCE_ROOT = [
+  'react',
+  'react/jsx-runtime',
+  'react/jsx-dev-runtime',
+  'react-native',
+  'react-native-svg',
+]
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (FORCE_ROOT.includes(moduleName)) {
-    return {
-      filePath: require.resolve(moduleName, { paths: [workspaceRoot] }),
-      type: 'sourceFile',
+    try {
+      return {
+        filePath: require.resolve(moduleName, { paths: [workspaceRoot] }),
+        type: 'sourceFile',
+      }
+    } catch {
+      // fall through to default resolution
     }
   }
   return context.resolveRequest(context, moduleName, platform)
