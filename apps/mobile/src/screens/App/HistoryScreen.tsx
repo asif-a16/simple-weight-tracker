@@ -93,7 +93,7 @@ export default function HistoryScreen() {
         )}
       />
 
-      <Modal visible={!!editEntry} animationType="slide" presentationStyle="pageSheet">
+      <Modal visible={!!editEntry} animationType="slide">
         {editEntry && (
           <View style={{ flex: 1, backgroundColor: colors.bg }}>
             <TouchableOpacity style={s.closeBtn} onPress={() => setEditEntry(null)}>

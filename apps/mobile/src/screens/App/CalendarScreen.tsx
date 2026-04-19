@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { View, StyleSheet, Modal, TouchableOpacity, Text, ActivityIndicator } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native'
 import { Calendar } from 'react-native-calendars'
 import type { WeightLog } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
@@ -29,7 +30,7 @@ export default function CalendarScreen() {
     setLoading(false)
   }, [user])
 
-  useEffect(() => { fetchAll() }, [fetchAll])
+  useFocusEffect(fetchAll)
 
   const logMap = new Map(logs.map((l) => [l.logged_at, l]))
 

@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Dimensions, ActivityIndicator,
 } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native'
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { VictoryLine, VictoryChart, VictoryAxis, VictoryScatter, VictoryTooltip, VictoryVoronoiContainer } from 'victory-native'
 import { getDateRange, formatDate, formatWeight, type DateFilter } from '@simple-wt/shared'
@@ -30,7 +31,7 @@ export default function DashboardScreen({ navigation }: Props) {
   const [filter, setFilter] = useState<DateFilter>('30d')
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     if (!user) return
     const yearAgo = new Date()
     yearAgo.setFullYear(yearAgo.getFullYear() - 1)
@@ -41,7 +42,7 @@ export default function DashboardScreen({ navigation }: Props) {
       .gte('logged_at', yearAgo.toISOString().slice(0, 10))
       .order('logged_at', { ascending: true })
       .then(({ data }) => { setLogs(data ?? []); setLoading(false) })
-  }, [user])
+  }, [user]))
 
   const filtered = useMemo(() => {
     const { from, to } = getDateRange(filter)
