@@ -27,8 +27,23 @@ config.resolver.unstable_enableSymlinks = true
 // shares one instance. We only redirect the bare package name — NOT subpaths
 // like react-native/Libraries/… — so Metro's own platform-aware resolver
 // still picks .android.js/.native.js variants for internal requires.
-// With node-linker=hoisted removed, pnpm uses symlinks. unstable_enableSymlinks
-// resolves them to the real .pnpm store path so every package has one module ID.
-// No manual resolveRequest deduplication needed.
+// pnpm hoists React as a real directory to root/node_modules/react, while
+// app/node_modules/react is a symlink to the .pnpm store. unstable_enableSymlinks
+// resolves the symlink but not the real directory, giving two distinct module IDs.
+// Force all React imports to root's copy so there is exactly one instance.
+const FORCE_ROOT = ['react', 'react/jsx-runtime', 'react/jsx-dev-runtime']
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (FORCE_ROOT.includes(moduleName)) {
+    try {
+      return {
+        filePath: require.resolve(moduleName, { paths: [workspaceRoot] }),
+        type: 'sourceFile',
+      }
+    } catch {
+      // fall through to default resolution
+    }
+  }
+  return context.resolveRequest(context, moduleName, platform)
+}
 
 module.exports = config
