@@ -88,7 +88,7 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
           id="logged_at"
           type="date"
           max={today}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
         {errors.logged_at && (
           <p className="mt-1 text-sm text-red-600">{errors.logged_at.message}</p>
@@ -106,7 +106,7 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
           step="0.01"
           min="1"
           max="999"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="e.g. 75.5"
         />
         {errors.weight_kg && (

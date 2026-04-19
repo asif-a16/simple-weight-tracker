@@ -64,7 +64,7 @@ export default function RegisterPage() {
               id="name"
               type="text"
               autoComplete="name"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Alex Smith"
             />
             {errors.name && (
@@ -81,7 +81,7 @@ export default function RegisterPage() {
               id="email"
               type="email"
               autoComplete="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="you@example.com"
             />
             {errors.email && (
@@ -98,7 +98,7 @@ export default function RegisterPage() {
               id="password"
               type="password"
               autoComplete="new-password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Min. 8 characters"
             />
             {errors.password && (

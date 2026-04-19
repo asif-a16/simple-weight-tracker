@@ -77,7 +77,7 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
               value={customFrom}
               max={customTo || today}
               onChange={(e) => setCustomFrom(e.target.value)}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <span className="text-gray-500 text-sm">to</span>
             <input
@@ -86,7 +86,7 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
               min={customFrom}
               max={today}
               onChange={(e) => setCustomTo(e.target.value)}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         )}
