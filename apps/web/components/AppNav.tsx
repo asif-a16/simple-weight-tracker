@@ -5,10 +5,10 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
-  { href: '/app/dashboard', label: 'Dashboard' },
-  { href: '/app/log', label: 'Log Weight' },
-  { href: '/app/history', label: 'History' },
-  { href: '/app/calendar', label: 'Calendar' },
+  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/log', label: 'Log Weight' },
+  { href: '/history', label: 'History' },
+  { href: '/calendar', label: 'Calendar' },
 ]
 
 export default function AppNav({ userName }: { userName: string }) {

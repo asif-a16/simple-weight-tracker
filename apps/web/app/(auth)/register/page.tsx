@@ -36,7 +36,7 @@ export default function RegisterPage() {
       }
       return
     }
-    router.push('/app/dashboard')
+    router.push('/dashboard')
     router.refresh()
   }
 

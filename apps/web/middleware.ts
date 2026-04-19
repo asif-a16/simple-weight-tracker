@@ -28,12 +28,13 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  if (!user && pathname.startsWith('/app')) {
+  const protectedRoutes = ['/dashboard', '/log', '/history', '/calendar']
+  if (!user && protectedRoutes.some(r => pathname.startsWith(r))) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
   if (user && (pathname === '/login' || pathname === '/register' || pathname === '/')) {
-    return NextResponse.redirect(new URL('/app/dashboard', request.url))
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return supabaseResponse
