@@ -13,33 +13,42 @@ interface LogEntry {
   notes: string | null
 }
 
-const FILTERS: { label: string; value: DateFilter }[] = [
+type ChartFilter = DateFilter | 'year'
+
+const FILTERS: { label: string; value: ChartFilter }[] = [
   { label: '7 days', value: '7d' },
   { label: '30 days', value: '30d' },
   { label: '90 days', value: '90d' },
   { label: '1 year', value: '1y' },
+  { label: 'Year', value: 'year' },
   { label: 'Custom', value: 'custom' },
 ]
 
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
 export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
-  const [filter, setFilter] = useState<DateFilter>('30d')
+  const [filter, setFilter] = useState<ChartFilter>('30d')
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
   const today = new Date().toISOString().slice(0, 10)
+  const currentYear = new Date().getFullYear()
+  const [selectedYear, setSelectedYear] = useState(currentYear)
+
+  const earliestYear = logs.length > 0
+    ? Math.min(...logs.map(l => parseInt(l.logged_at.slice(0, 4))))
+    : currentYear
 
   const filtered = useMemo(() => {
-    let from: string, to: string
+    if (filter === 'year') {
+      return logs.filter(l => l.logged_at.startsWith(`${selectedYear}`))
+    }
     if (filter === 'custom') {
       if (!customFrom || !customTo || customFrom > customTo) return []
-      from = customFrom
-      to = customTo
-    } else {
-      const range = getDateRange(filter)
-      from = range.from
-      to = range.to
+      return logs.filter((l) => l.logged_at >= customFrom && l.logged_at <= customTo)
     }
-    return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
-  }, [logs, filter, customFrom, customTo])
+    const range = getDateRange(filter as DateFilter)
+    return logs.filter((l) => l.logged_at >= range.from && l.logged_at <= range.to)
+  }, [logs, filter, customFrom, customTo, selectedYear])
 
   const chartData = filtered.map((l) => ({
     date: l.logged_at,
@@ -69,6 +78,22 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
             {label}
           </button>
         ))}
+
+        {filter === 'year' && (
+          <div className="flex items-center gap-3 mt-2 sm:mt-0">
+            <button
+              onClick={() => setSelectedYear(y => y - 1)}
+              disabled={selectedYear <= earliestYear}
+              className="text-2xl font-semibold text-blue-600 disabled:opacity-25 px-1 leading-none"
+            >‹</button>
+            <span className="text-base font-bold text-gray-900 dark:text-gray-100 w-14 text-center">{selectedYear}</span>
+            <button
+              onClick={() => setSelectedYear(y => y + 1)}
+              disabled={selectedYear >= currentYear}
+              className="text-2xl font-semibold text-blue-600 disabled:opacity-25 px-1 leading-none"
+            >›</button>
+          </div>
+        )}
 
         {filter === 'custom' && (
           <div className="flex items-center gap-2 mt-2 w-full sm:w-auto sm:mt-0">
@@ -106,7 +131,7 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
                 dataKey="date"
                 tickFormatter={(d: string) => {
                   const [, m, day] = d.split('-')
-                  return `${day}/${m}`
+                  return filter === 'year' ? MONTHS[parseInt(m) - 1] : `${day}/${m}`
                 }}
                 tick={{ fontSize: 12, fill: '#9ca3af' }}
                 tickLine={false}

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Dimensions, ActivityIndicator,
+  Dimensions, ActivityIndicator, TextInput,
 } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
@@ -11,13 +11,17 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 
-type FilterOption = { label: string; value: DateFilter }
-const FILTERS: FilterOption[] = [
+type ChartFilter = DateFilter | 'year'
+const FILTERS: { label: string; value: ChartFilter }[] = [
   { label: '7d', value: '7d' },
   { label: '30d', value: '30d' },
   { label: '90d', value: '90d' },
   { label: '1yr', value: '1y' },
+  { label: 'Year', value: 'year' },
+  { label: 'Custom', value: 'custom' },
 ]
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 interface LogEntry { id: string; weight_kg: number; logged_at: string }
 
@@ -28,26 +32,38 @@ export default function DashboardScreen({ navigation }: Props) {
   const { colors, dark } = useTheme()
   const s = makeStyles(colors)
   const [logs, setLogs] = useState<LogEntry[]>([])
-  const [filter, setFilter] = useState<DateFilter>('30d')
+  const [filter, setFilter] = useState<ChartFilter>('30d')
   const [loading, setLoading] = useState(true)
+  const currentYear = new Date().getFullYear()
+  const [selectedYear, setSelectedYear] = useState(currentYear)
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
 
   useFocusEffect(useCallback(() => {
     if (!user) return
-    const yearAgo = new Date()
-    yearAgo.setFullYear(yearAgo.getFullYear() - 1)
     supabase
       .from('weight_logs')
       .select('id, weight_kg, logged_at')
       .eq('user_id', user.id)
-      .gte('logged_at', yearAgo.toISOString().slice(0, 10))
       .order('logged_at', { ascending: true })
       .then(({ data }) => { setLogs(data ?? []); setLoading(false) })
   }, [user]))
 
+  const earliestYear = logs.length > 0
+    ? Math.min(...logs.map(l => parseInt(l.logged_at.slice(0, 4))))
+    : currentYear
+
   const filtered = useMemo(() => {
-    const { from, to } = getDateRange(filter)
+    if (filter === 'year') {
+      return logs.filter(l => l.logged_at.startsWith(`${selectedYear}`))
+    }
+    if (filter === 'custom') {
+      if (!customFrom || !customTo || customFrom > customTo) return []
+      return logs.filter(l => l.logged_at >= customFrom && l.logged_at <= customTo)
+    }
+    const { from, to } = getDateRange(filter as DateFilter)
     return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
-  }, [logs, filter])
+  }, [logs, filter, selectedYear, customFrom, customTo])
 
   const chartData = filtered.map((l) => ({ x: l.logged_at, y: l.weight_kg }))
   const weights = filtered.map((l) => l.weight_kg)
@@ -58,10 +74,12 @@ export default function DashboardScreen({ navigation }: Props) {
   const gridColor = dark ? '#374151' : '#f3f4f6'
   const tickColor = dark ? '#9CA3AF' : '#9ca3af'
 
+  const isYearView = filter === 'year'
+
   return (
     <View style={s.outer}>
     <ScrollView style={s.container} contentContainerStyle={s.content}>
-      <View style={s.filterRow}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.filterScroll} contentContainerStyle={s.filterRow}>
         {FILTERS.map(({ label, value }) => (
           <TouchableOpacity
             key={value}
@@ -71,7 +89,49 @@ export default function DashboardScreen({ navigation }: Props) {
             <Text style={[s.filterText, filter === value && s.filterTextActive]}>{label}</Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
+
+      {filter === 'year' && (
+        <View style={s.yearNav}>
+          <TouchableOpacity
+            onPress={() => setSelectedYear(y => y - 1)}
+            disabled={selectedYear <= earliestYear}
+            style={[s.yearArrow, selectedYear <= earliestYear && s.yearArrowDisabled]}
+          >
+            <Text style={s.yearArrowText}>‹</Text>
+          </TouchableOpacity>
+          <Text style={s.yearLabel}>{selectedYear}</Text>
+          <TouchableOpacity
+            onPress={() => setSelectedYear(y => y + 1)}
+            disabled={selectedYear >= currentYear}
+            style={[s.yearArrow, selectedYear >= currentYear && s.yearArrowDisabled]}
+          >
+            <Text style={s.yearArrowText}>›</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {filter === 'custom' && (
+        <View style={s.customRow}>
+          <TextInput
+            style={s.dateInput}
+            value={customFrom}
+            onChangeText={setCustomFrom}
+            placeholder="From YYYY-MM-DD"
+            placeholderTextColor={colors.textSecondary}
+            maxLength={10}
+          />
+          <Text style={s.dateSep}>→</Text>
+          <TextInput
+            style={s.dateInput}
+            value={customTo}
+            onChangeText={setCustomTo}
+            placeholder="To YYYY-MM-DD"
+            placeholderTextColor={colors.textSecondary}
+            maxLength={10}
+          />
+        </View>
+      )}
 
       <View style={s.card}>
         {loading ? (
@@ -102,9 +162,9 @@ export default function DashboardScreen({ navigation }: Props) {
               style={{ tickLabels: { fontSize: 10, fill: tickColor }, axis: { stroke: 'none' }, grid: { stroke: gridColor } }}
               tickFormat={(d: string) => {
                 const [, m, day] = d.split('-')
-                return `${day}/${m}`
+                return isYearView ? MONTHS[parseInt(m) - 1] : `${day}/${m}`
               }}
-              tickCount={5}
+              tickCount={isYearView ? 12 : 5}
             />
             <VictoryAxis
               dependentAxis
@@ -163,7 +223,8 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       shadowOpacity: 0.3, shadowRadius: 8, elevation: 6,
     },
     logBtnText: { color: '#fff', fontSize: 18, fontWeight: '700', letterSpacing: 0.3 },
-    filterRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+    filterScroll: { flexGrow: 0, marginBottom: 12 },
+    filterRow: { flexDirection: 'row', gap: 8 },
     filterBtn: {
       paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
       borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
@@ -171,6 +232,23 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     filterBtnActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
     filterText: { fontSize: 13, fontWeight: '500', color: colors.text },
     filterTextActive: { color: '#fff' },
+    yearNav: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+      marginBottom: 12, gap: 20,
+    },
+    yearArrow: { padding: 8 },
+    yearArrowDisabled: { opacity: 0.25 },
+    yearArrowText: { fontSize: 26, fontWeight: '600', color: '#2563eb' },
+    yearLabel: { fontSize: 18, fontWeight: '700', color: colors.text, minWidth: 56, textAlign: 'center' },
+    customRow: {
+      flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
+    },
+    dateInput: {
+      flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 8,
+      paddingHorizontal: 12, paddingVertical: 8, fontSize: 13,
+      color: colors.text, backgroundColor: colors.surface,
+    },
+    dateSep: { color: colors.textSecondary, fontSize: 14 },
     card: {
       backgroundColor: colors.surface, borderRadius: 16, padding: 12,
       shadowColor: '#000', shadowOffset: { width: 0, height: 1 },

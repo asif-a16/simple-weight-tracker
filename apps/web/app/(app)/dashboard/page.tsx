@@ -7,15 +7,10 @@ export default async function DashboardPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Fetch last 365 days by default — client filters from this cache
-  const yearAgo = new Date()
-  yearAgo.setFullYear(yearAgo.getFullYear() - 1)
-
   const { data: logs } = await supabase
     .from('weight_logs')
     .select('id, weight_kg, logged_at, notes')
     .eq('user_id', user!.id)
-    .gte('logged_at', yearAgo.toISOString().slice(0, 10))
     .order('logged_at', { ascending: true })
 
   const { data: profile } = await supabase

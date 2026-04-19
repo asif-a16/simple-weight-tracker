@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  Modal, Alert, ActivityIndicator, ScrollView,
+  Modal, Alert, ActivityIndicator, ScrollView, TextInput,
 } from 'react-native'
 import * as Sharing from 'expo-sharing'
 import * as FileSystem from 'expo-file-system'
@@ -18,6 +18,7 @@ const FILTERS: { label: string; value: HistoryFilter }[] = [
   { label: '30d', value: '30d' },
   { label: '90d', value: '90d' },
   { label: '1yr', value: '1y' },
+  { label: 'Custom', value: 'custom' },
 ]
 
 export default function HistoryScreen() {
@@ -28,6 +29,8 @@ export default function HistoryScreen() {
   const [loading, setLoading] = useState(true)
   const [editEntry, setEditEntry] = useState<WeightLog | null>(null)
   const [filter, setFilter] = useState<HistoryFilter>('all')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
 
   const fetchLogs = useCallback(async () => {
     if (!user) return
@@ -44,9 +47,13 @@ export default function HistoryScreen() {
 
   const filtered = useMemo(() => {
     if (filter === 'all') return logs
+    if (filter === 'custom') {
+      if (!customFrom || !customTo || customFrom > customTo) return logs
+      return logs.filter(l => l.logged_at >= customFrom && l.logged_at <= customTo)
+    }
     const { from, to } = getDateRange(filter)
     return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
-  }, [logs, filter])
+  }, [logs, filter, customFrom, customTo])
 
   async function handleDelete(id: string) {
     Alert.alert('Delete entry?', 'This action cannot be undone.', [
@@ -85,6 +92,28 @@ export default function HistoryScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {filter === 'custom' && (
+        <View style={s.customRow}>
+          <TextInput
+            style={s.dateInput}
+            value={customFrom}
+            onChangeText={setCustomFrom}
+            placeholder="From YYYY-MM-DD"
+            placeholderTextColor={colors.textSecondary}
+            maxLength={10}
+          />
+          <Text style={s.dateSep}>→</Text>
+          <TextInput
+            style={s.dateInput}
+            value={customTo}
+            onChangeText={setCustomTo}
+            placeholder="To YYYY-MM-DD"
+            placeholderTextColor={colors.textSecondary}
+            maxLength={10}
+          />
+        </View>
+      )}
 
       {logs.length > 0 && (
         <TouchableOpacity style={s.exportBtn} onPress={handleExport}>
@@ -153,6 +182,13 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     },
     filterBtnActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
     filterText: { fontSize: 13, fontWeight: '500', color: colors.text },
+    customRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingBottom: 8 },
+    dateInput: {
+      flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 8,
+      paddingHorizontal: 12, paddingVertical: 8, fontSize: 13,
+      color: colors.text, backgroundColor: colors.surface,
+    },
+    dateSep: { color: colors.textSecondary, fontSize: 14 },
     filterTextActive: { color: '#fff' },
     exportBtn: {
       margin: 16, marginBottom: 8, paddingVertical: 10, borderRadius: 10,

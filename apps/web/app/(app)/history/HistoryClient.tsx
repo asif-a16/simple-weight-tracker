@@ -14,6 +14,7 @@ const FILTERS: { label: string; value: HistoryFilter }[] = [
   { label: '30 days', value: '30d' },
   { label: '90 days', value: '90d' },
   { label: '1 year', value: '1y' },
+  { label: 'Custom', value: 'custom' },
 ]
 
 export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
@@ -22,12 +23,19 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [filter, setFilter] = useState<HistoryFilter>('all')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
+  const today = new Date().toISOString().slice(0, 10)
 
   const filtered = useMemo(() => {
     if (filter === 'all') return logs
+    if (filter === 'custom') {
+      if (!customFrom || !customTo || customFrom > customTo) return logs
+      return logs.filter(l => l.logged_at >= customFrom && l.logged_at <= customTo)
+    }
     const { from, to } = getDateRange(filter)
     return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
-  }, [logs, filter])
+  }, [logs, filter, customFrom, customTo])
 
   function downloadCSV() {
     const csv = toCSV(logs)
@@ -73,6 +81,27 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
           </button>
         ))}
       </div>
+
+      {filter === 'custom' && (
+        <div className="flex items-center gap-2 mb-4">
+          <input
+            type="date"
+            value={customFrom}
+            max={customTo || today}
+            onChange={(e) => setCustomFrom(e.target.value)}
+            className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#1B1D1E] focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <span className="text-gray-500 dark:text-gray-400 text-sm">to</span>
+          <input
+            type="date"
+            value={customTo}
+            min={customFrom}
+            max={today}
+            onChange={(e) => setCustomTo(e.target.value)}
+            className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#1B1D1E] focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      )}
 
       {logs.length === 0 ? (
         <div className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-12 text-center">
