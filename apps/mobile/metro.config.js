@@ -13,9 +13,21 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ]
 
-// Resolve symlinks to their real paths so pnpm's symlinked packages
-// (e.g. react appearing in both root and app node_modules) get the same
-// module ID and are not bundled twice.
+// Resolve symlinks to real paths so pnpm's symlinked packages share one module ID.
 config.resolver.unstable_enableSymlinks = true
+
+// Force React imports to always resolve from the workspace root regardless of
+// which package triggers the import. This prevents duplicate React instances
+// in a pnpm monorepo where both root and app node_modules contain React symlinks.
+const FORCE_ROOT = ['react', 'react/jsx-runtime', 'react/jsx-dev-runtime']
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (FORCE_ROOT.includes(moduleName)) {
+    return {
+      filePath: require.resolve(moduleName, { paths: [workspaceRoot] }),
+      type: 'sourceFile',
+    }
+  }
+  return context.resolveRequest(context, moduleName, platform)
+}
 
 module.exports = config
