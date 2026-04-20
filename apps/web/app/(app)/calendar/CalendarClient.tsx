@@ -6,7 +6,7 @@ import { formatWeight, type WeightLog } from '@simple-wt/shared'
 import LogWeightForm from '@/components/weight/LogWeightForm'
 
 interface Props {
-  logs: Pick<WeightLog, 'id' | 'weight_kg' | 'logged_at' | 'notes'>[]
+  logs: Pick<WeightLog, 'id' | 'weight_kg' | 'logged_at'>[]
   accountCreatedAt: string
 }
 
@@ -121,7 +121,6 @@ export default function CalendarClient({ logs, accountCreatedAt }: Props) {
                 entryId={modalEntry?.id}
                 initialDate={modalDate}
                 initialWeight={modalEntry?.weight_kg}
-                initialNotes={modalEntry?.notes}
                 onSuccess={() => {
                   setModalDate(null)
                   router.refresh()

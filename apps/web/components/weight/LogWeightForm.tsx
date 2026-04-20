@@ -4,18 +4,17 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { weightLogSchema, type WeightLogInput, sanitizeNotes } from '@simple-wt/shared'
+import { weightLogSchema, type WeightLogInput } from '@simple-wt/shared'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   initialDate?: string
   initialWeight?: number
-  initialNotes?: string | null
   entryId?: string
   onSuccess?: () => void
 }
 
-export default function LogWeightForm({ initialDate, initialWeight, initialNotes, entryId, onSuccess }: Props) {
+export default function LogWeightForm({ initialDate, initialWeight, entryId, onSuccess }: Props) {
   const [serverError, setServerError] = useState<string | null>(null)
   const today = new Date().toISOString().slice(0, 10)
 
@@ -29,7 +28,6 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
     defaultValues: {
       logged_at: initialDate ?? today,
       weight_kg: initialWeight ?? undefined,
-      notes: initialNotes ?? '',
     },
   })
 
@@ -40,20 +38,17 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setServerError('Not signed in.'); return }
 
-    const notes = sanitizeNotes(data.notes ?? null)
-
     let error
     if (entryId) {
       ;({ error } = await supabase
         .from('weight_logs')
-        .update({ weight_kg: data.weight_kg, logged_at: data.logged_at, notes })
+        .update({ weight_kg: data.weight_kg, logged_at: data.logged_at })
         .eq('id', entryId))
     } else {
       ;({ error } = await supabase.from('weight_logs').insert({
         user_id: user.id,
         weight_kg: data.weight_kg,
         logged_at: data.logged_at,
-        notes,
       }))
     }
 
@@ -67,7 +62,7 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
     }
 
     toast.success(entryId ? 'Entry updated' : 'Weight logged!')
-    if (!entryId) reset({ logged_at: today, weight_kg: undefined, notes: '' })
+    if (!entryId) reset({ logged_at: today, weight_kg: undefined })
     onSuccess?.()
   }
 
@@ -113,23 +108,6 @@ export default function LogWeightForm({ initialDate, initialWeight, initialNotes
         />
         {errors.weight_kg && (
           <p className="mt-1 text-sm text-red-600">{errors.weight_kg.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Notes <span className="text-gray-400 font-normal">(optional)</span>
-        </label>
-        <textarea
-          {...register('notes')}
-          id="notes"
-          rows={3}
-          maxLength={500}
-          className={`${inputClass} resize-none`}
-          placeholder="How are you feeling today?"
-        />
-        {errors.notes && (
-          <p className="mt-1 text-sm text-red-600">{errors.notes.message}</p>
         )}
       </div>
 

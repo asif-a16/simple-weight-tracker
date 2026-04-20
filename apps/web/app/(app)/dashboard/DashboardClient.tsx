@@ -11,7 +11,6 @@ interface LogEntry {
   id: string
   weight_kg: number
   logged_at: string
-  notes: string | null
 }
 
 type ChartFilter = DateFilter | 'year'
@@ -149,7 +148,7 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
                 }}
               />
               <Line
-                type="monotone"
+                type="linear"
                 dataKey="weight"
                 stroke="#2563eb"
                 strokeWidth={2}

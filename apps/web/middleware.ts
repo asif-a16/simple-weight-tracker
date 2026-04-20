@@ -28,8 +28,12 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  const protectedRoutes = ['/dashboard', '/log', '/history', '/calendar']
-  if (!user && protectedRoutes.some(r => pathname.startsWith(r))) {
+  const protectedRoutes = ['/dashboard', '/log', '/history', '/calendar', '/settings']
+  const isProtectedRoute = protectedRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  )
+
+  if (!user && isProtectedRoute) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 

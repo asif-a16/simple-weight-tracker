@@ -10,6 +10,7 @@ const navItems = [
   { href: '/log', label: 'Log Weight' },
   { href: '/history', label: 'History' },
   { href: '/calendar', label: 'Calendar' },
+  { href: '/settings', label: 'Settings' },
 ]
 
 export default function AppNav({ userName }: { userName: string }) {

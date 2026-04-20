@@ -121,7 +121,6 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
             <tr>
               <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Date</th>
               <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Weight</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 hidden sm:table-cell">Notes</th>
               <th className="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
           </thead>
@@ -130,9 +129,6 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
               <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 <td className="px-4 py-3 text-gray-900 dark:text-gray-100 font-medium">{formatDate(log.logged_at)}</td>
                 <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{formatWeight(log.weight_kg)}</td>
-                <td className="px-4 py-3 text-gray-500 dark:text-gray-400 hidden sm:table-cell max-w-xs truncate">
-                  {log.notes ?? '—'}
-                </td>
                 <td className="px-4 py-3 text-right space-x-2">
                   <button
                     onClick={() => setEditEntry(log)}
@@ -166,7 +162,6 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
                 entryId={editEntry.id}
                 initialDate={editEntry.logged_at}
                 initialWeight={editEntry.weight_kg}
-                initialNotes={editEntry.notes}
                 onSuccess={() => {
                   setEditEntry(null)
                   router.refresh()

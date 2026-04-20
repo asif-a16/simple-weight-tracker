@@ -15,7 +15,7 @@ export default async function CalendarPage() {
 
   const { data: logs } = await supabase
     .from('weight_logs')
-    .select('id, weight_kg, logged_at, notes')
+    .select('id, weight_kg, logged_at')
     .eq('user_id', user!.id)
     .order('logged_at', { ascending: false })
 
