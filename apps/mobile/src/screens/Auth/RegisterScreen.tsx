@@ -14,6 +14,7 @@ type Props = { navigation: NativeStackNavigationProp<any> }
 
 export default function RegisterScreen({ navigation }: Props) {
   const [serverError, setServerError] = useState<string | null>(null)
+  const [confirmed, setConfirmed] = useState(false)
   const { colors } = useTheme()
   const s = makeStyles(colors)
 
@@ -34,7 +35,22 @@ export default function RegisterScreen({ navigation }: Props) {
           ? 'An account with this email already exists.'
           : error.message
       )
+      return
     }
+    setConfirmed(true)
+  }
+
+  if (confirmed) {
+    return (
+      <View style={[s.flex, { justifyContent: 'center', alignItems: 'center', padding: 32 }]}>
+        <Text style={{ fontSize: 48, marginBottom: 16 }}>📧</Text>
+        <Text style={[s.title, { marginBottom: 8 }]}>Check your email</Text>
+        <Text style={[s.subtitle, { marginBottom: 24 }]}>We sent a confirmation link to your email address. Click it to activate your account.</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <Text style={s.link}>Back to sign in</Text>
+        </TouchableOpacity>
+      </View>
+    )
   }
 
   return (
@@ -144,6 +160,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
     linkRow: { marginTop: 20, alignItems: 'center' },
     linkText: { fontSize: 14, color: colors.textSecondary },
-    link: { color: '#2563eb', fontWeight: '600' },
+    link: { color: '#2563eb', fontWeight: '600', fontSize: 15 },
   })
 }

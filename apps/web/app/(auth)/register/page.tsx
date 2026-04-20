@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 export default function RegisterPage() {
   const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
+  const [confirmed, setConfirmed] = useState(false)
 
   const {
     register,
@@ -36,8 +37,20 @@ export default function RegisterPage() {
       }
       return
     }
-    router.push('/dashboard')
-    router.refresh()
+    setConfirmed(true)
+  }
+
+  if (confirmed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#181A1B] px-4">
+        <div className="w-full max-w-md text-center space-y-4 bg-white dark:bg-[#1B1D1E] p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="text-4xl">📧</div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Check your email</h2>
+          <p className="text-gray-600 dark:text-gray-400">We sent a confirmation link to your email address. Click it to activate your account.</p>
+          <Link href="/login" className="inline-block mt-4 text-blue-600 hover:underline font-medium text-sm">Back to sign in</Link>
+        </div>
+      </div>
+    )
   }
 
   return (

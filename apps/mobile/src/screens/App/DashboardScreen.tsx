@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useRef, useState, useMemo, useCallback } from 'react'
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
   Dimensions, ActivityIndicator, Modal, Pressable, KeyboardAvoidingView, Platform,
 } from 'react-native'
 import DateRangePicker from '../../components/DateRangePicker'
@@ -38,6 +38,7 @@ export default function DashboardScreen() {
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
   const [logVisible, setLogVisible] = useState(false)
+  const weightInputRef = useRef<TextInput>(null)
 
   const loadLogs = useCallback(() => {
     if (!user) return
@@ -195,7 +196,7 @@ export default function DashboardScreen() {
       </TouchableOpacity>
     </View>
 
-    <Modal visible={logVisible} transparent animationType="fade" onRequestClose={() => setLogVisible(false)}>
+    <Modal visible={logVisible} transparent animationType="fade" onRequestClose={() => setLogVisible(false)} onShow={() => setTimeout(() => weightInputRef.current?.focus(), 100)}>
       <KeyboardAvoidingView style={s.modalOuter} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Pressable style={s.overlay} onPress={() => setLogVisible(false)} />
         <View style={s.logCard}>
@@ -203,6 +204,7 @@ export default function DashboardScreen() {
           <LogScreen
             compact
             showHeading
+            weightInputRef={weightInputRef}
             onSuccess={() => { setLogVisible(false); loadLogs() }}
           />
         </View>
