@@ -147,7 +147,7 @@ export default function HistoryScreen() {
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
-    filterScroll: { flexGrow: 0 },
+    filterScroll: { flexGrow: 0, flexShrink: 0 },
     filterRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, alignItems: 'center' },
     filterBtn: {
       paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20,

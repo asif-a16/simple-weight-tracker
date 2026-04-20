@@ -71,7 +71,7 @@ export default function CalendarScreen() {
         }}
       />
 
-      <Modal visible={!!modalDate} animationType="slide">
+      <Modal visible={!!modalDate} animationType="slide" onRequestClose={() => setModalDate(null)}>
         {modalDate && (
           <View style={{ flex: 1, backgroundColor: colors.bg }}>
             <TouchableOpacity style={s.closeBtn} onPress={() => setModalDate(null)}>

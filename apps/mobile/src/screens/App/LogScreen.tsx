@@ -7,6 +7,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { weightLogSchema, type WeightLogInput, sanitizeNotes } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 
 interface Props {
@@ -22,6 +23,7 @@ interface Props {
 export default function LogScreen({ initialDate, initialWeight, initialNotes, entryId, onSuccess, showHeading = false, weightInputRef }: Props) {
   const today = new Date().toISOString().slice(0, 10)
   const [serverError, setServerError] = useState<string | null>(null)
+  const { user } = useAuth()
   const { colors } = useTheme()
   const s = makeStyles(colors)
 
@@ -45,7 +47,7 @@ export default function LogScreen({ initialDate, initialWeight, initialNotes, en
     if (entryId) {
       ;({ error } = await supabase.from('weight_logs').update(payload).eq('id', entryId))
     } else {
-      ;({ error } = await supabase.from('weight_logs').insert(payload))
+      ;({ error } = await supabase.from('weight_logs').insert({ ...payload, user_id: user!.id }))
     }
     if (error) {
       if (error.code === '23505') {
