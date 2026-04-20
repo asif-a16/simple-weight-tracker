@@ -195,7 +195,7 @@ export default function DashboardScreen() {
       </TouchableOpacity>
     </View>
 
-    <Modal visible={logVisible} transparent animationType="slide" onRequestClose={() => setLogVisible(false)}>
+    <Modal visible={logVisible} transparent animationType="fade" onRequestClose={() => setLogVisible(false)}>
       <KeyboardAvoidingView style={s.modalOuter} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Pressable style={s.overlay} onPress={() => setLogVisible(false)} />
         <View style={s.logCard}>
@@ -218,18 +218,15 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { flex: 1 },
     content: { padding: 16, paddingBottom: 16 },
     bottomBar: { padding: 16, paddingBottom: 24, backgroundColor: colors.bg },
-    modalOuter: { flex: 1, justifyContent: 'flex-end' },
+    modalOuter: { flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
     overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
     logCard: {
       backgroundColor: colors.surface,
-      borderTopLeftRadius: 24, borderTopRightRadius: 24,
-      shadowColor: '#000', shadowOffset: { width: 0, height: -4 },
-      shadowOpacity: 0.12, shadowRadius: 16, elevation: 24,
+      borderRadius: 24,
+      shadowColor: '#000', shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.15, shadowRadius: 24, elevation: 24,
     },
-    logCardHandle: {
-      width: 40, height: 4, borderRadius: 2,
-      backgroundColor: colors.border, alignSelf: 'center', marginTop: 12, marginBottom: 4,
-    },
+    logCardHandle: { height: 12 },
     logBtn: {
       backgroundColor: '#2563eb', borderRadius: 14, paddingVertical: 18,
       alignItems: 'center',
