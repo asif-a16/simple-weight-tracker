@@ -32,6 +32,37 @@ export function sanitizeNotes(notes: string | null | undefined): string | null {
   return notes.replace(/<[^>]*>/g, '').trim() || null
 }
 
+export function parseImportCSV(text: string): { logged_at: string; weight_kg: number }[] {
+  const results: { logged_at: string; weight_kg: number }[] = []
+  for (const line of text.split(/\r?\n/)) {
+    const parts = line.trim().split(/[\t,]/)
+    if (parts.length < 2) continue
+    const dateStr = parts[0].trim()
+    const weightStr = parts[1].trim()
+    if (!weightStr) continue
+    const weight = parseFloat(weightStr)
+    if (isNaN(weight) || weight <= 0 || weight >= 1000) continue
+    const date = parseImportDate(dateStr)
+    if (!date) continue
+    results.push({ logged_at: date, weight_kg: Math.round(weight * 100) / 100 })
+  }
+  return results
+}
+
+function parseImportDate(s: string): string | null {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/)
+  if (m) {
+    let year = parseInt(m[3])
+    if (year < 100) year += 2000
+    const month = parseInt(m[1])
+    const day = parseInt(m[2])
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  }
+  return null
+}
+
 export function toCSV(logs: { logged_at: string; weight_kg: number; notes: string | null }[]): string {
   const header = 'Date,Weight (kg),Notes'
   const rows = [...logs]

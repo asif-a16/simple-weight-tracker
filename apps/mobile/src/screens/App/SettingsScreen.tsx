@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, TextInput } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, TextInput, Modal, Pressable } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
-import { toCSV } from '@simple-wt/shared'
+import * as DocumentPicker from 'expo-document-picker'
+import { toCSV, parseImportCSV } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -13,6 +14,8 @@ export default function SettingsScreen() {
   const s = makeStyles(colors)
 
   const [exporting, setExporting] = useState(false)
+  const [importPreview, setImportPreview] = useState<{ rows: { logged_at: string; weight_kg: number }[]; skipped: number } | null>(null)
+  const [importing, setImporting] = useState(false)
   const [name, setName] = useState('')
   const [editingName, setEditingName] = useState(false)
   const [nameInput, setNameInput] = useState('')
@@ -34,6 +37,29 @@ export default function SettingsScreen() {
     if (error) { Alert.alert('Error', 'Failed to save. Try again.'); return }
     setName(trimmed)
     setEditingName(false)
+  }
+
+  async function handleImport() {
+    const result = await DocumentPicker.getDocumentAsync({ type: ['text/csv', 'text/plain', 'text/comma-separated-values', '*/*'] })
+    if (result.canceled || !result.assets?.[0]) return
+    const text = await FileSystem.readAsStringAsync(result.assets[0].uri)
+    const rows = parseImportCSV(text)
+    const totalLines = text.split(/\r?\n/).filter(l => l.trim()).length
+    setImportPreview({ rows, skipped: totalLines - rows.length })
+  }
+
+  async function handleImportConfirm() {
+    if (!importPreview?.rows.length || !user) return
+    setImporting(true)
+    const payload = importPreview.rows.map(r => ({ user_id: user.id, logged_at: r.logged_at, weight_kg: r.weight_kg }))
+    const { error } = await supabase.from('weight_logs').upsert(payload, { onConflict: 'user_id,logged_at' })
+    setImporting(false)
+    setImportPreview(null)
+    if (error) {
+      Alert.alert('Error', 'Import failed. Please try again.')
+    } else {
+      Alert.alert('Success', `Imported ${importPreview.rows.length} entries.`)
+    }
   }
 
   async function handleExport() {
@@ -136,7 +162,47 @@ export default function SettingsScreen() {
             ? <ActivityIndicator size="small" color="#2563eb" />
             : <Text style={s.rowChevron}>›</Text>}
         </TouchableOpacity>
+        <TouchableOpacity style={s.row} onPress={handleImport} activeOpacity={0.7}>
+          <Text style={s.rowLabel}>Import CSV</Text>
+          <Text style={s.rowChevron}>›</Text>
+        </TouchableOpacity>
       </View>
+
+      <Modal visible={!!importPreview} transparent animationType="fade" onRequestClose={() => setImportPreview(null)}>
+        <Pressable style={s.modalOverlay} onPress={() => setImportPreview(null)}>
+          <Pressable style={s.modalCard} onPress={() => {}}>
+            <Text style={s.modalTitle}>Import CSV</Text>
+            {importPreview?.rows.length === 0 ? (
+              <Text style={s.modalBody}>No valid entries found. Make sure the file has dates and weights.</Text>
+            ) : (
+              <>
+                <Text style={s.modalBody}>
+                  Found <Text style={s.modalBold}>{importPreview?.rows.length}</Text> entries to import.
+                  {(importPreview?.skipped ?? 0) > 0 && ` (${importPreview?.skipped} rows skipped — no weight.)`}
+                </Text>
+                <Text style={s.modalHint}>Existing entries for the same date will be overwritten.</Text>
+              </>
+            )}
+            <View style={s.modalBtns}>
+              <TouchableOpacity style={s.modalCancelBtn} onPress={() => setImportPreview(null)} activeOpacity={0.7}>
+                <Text style={s.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              {(importPreview?.rows.length ?? 0) > 0 && (
+                <TouchableOpacity
+                  style={[s.modalConfirmBtn, importing && s.modalConfirmDisabled]}
+                  onPress={handleImportConfirm}
+                  disabled={importing}
+                  activeOpacity={0.7}
+                >
+                  {importing
+                    ? <ActivityIndicator size="small" color="#fff" />
+                    : <Text style={s.modalConfirmText}>Import</Text>}
+                </TouchableOpacity>
+              )}
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   )
 }
@@ -184,5 +250,17 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     rowValue: { fontSize: 15, color: colors.textSecondary, maxWidth: '55%', textAlign: 'right' },
     rowChevron: { fontSize: 20, color: colors.textSecondary, lineHeight: 22 },
     danger: { color: '#ef4444' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', paddingHorizontal: 24 },
+    modalCard: { backgroundColor: colors.surface, borderRadius: 20, padding: 24, gap: 12 },
+    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.text },
+    modalBody: { fontSize: 14, color: colors.text, lineHeight: 20 },
+    modalBold: { fontWeight: '700' },
+    modalHint: { fontSize: 12, color: colors.textSecondary },
+    modalBtns: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    modalCancelBtn: { flex: 1, borderRadius: 10, paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
+    modalCancelText: { fontSize: 14, color: colors.text, fontWeight: '500' },
+    modalConfirmBtn: { flex: 1, borderRadius: 10, paddingVertical: 12, alignItems: 'center', backgroundColor: '#2563eb' },
+    modalConfirmDisabled: { backgroundColor: '#93c5fd' },
+    modalConfirmText: { fontSize: 14, color: '#fff', fontWeight: '600' },
   })
 }
