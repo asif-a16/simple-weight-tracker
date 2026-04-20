@@ -1,11 +1,11 @@
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert,
 } from 'react-native'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { weightLogSchema, type WeightLogInput, sanitizeNotes } from '@simple-wt/shared'
+import { weightLogSchema, type WeightLogInput } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -13,14 +13,13 @@ import { useTheme } from '../../context/ThemeContext'
 interface Props {
   initialDate?: string
   initialWeight?: number
-  initialNotes?: string | null
   entryId?: string
   onSuccess?: () => void
   showHeading?: boolean
   weightInputRef?: React.RefObject<TextInput>
 }
 
-export default function LogScreen({ initialDate, initialWeight, initialNotes, entryId, onSuccess, showHeading = false, weightInputRef }: Props) {
+export default function LogScreen({ initialDate, initialWeight, entryId, onSuccess, showHeading = false, weightInputRef }: Props) {
   const today = new Date().toISOString().slice(0, 10)
   const [serverError, setServerError] = useState<string | null>(null)
   const [weightText, setWeightText] = useState(initialWeight?.toString() ?? '')
@@ -33,17 +32,12 @@ export default function LogScreen({ initialDate, initialWeight, initialNotes, en
     defaultValues: {
       logged_at: initialDate ?? today,
       weight_kg: initialWeight ?? undefined,
-      notes: initialNotes ?? '',
     },
   })
 
   async function onSubmit(data: WeightLogInput) {
     setServerError(null)
-    const payload = {
-      weight_kg: data.weight_kg,
-      logged_at: data.logged_at,
-      notes: sanitizeNotes(data.notes ?? null),
-    }
+    const payload = { weight_kg: data.weight_kg, logged_at: data.logged_at }
     let error
     if (entryId) {
       ;({ error } = await supabase.from('weight_logs').update(payload).eq('id', entryId))
@@ -59,7 +53,10 @@ export default function LogScreen({ initialDate, initialWeight, initialNotes, en
       return
     }
     Alert.alert('Success', entryId ? 'Entry updated!' : 'Weight logged!')
-    if (!entryId) reset({ logged_at: today, notes: '' })
+    if (!entryId) {
+      reset({ logged_at: today })
+      setWeightText('')
+    }
     onSuccess?.()
   }
 
@@ -91,7 +88,7 @@ export default function LogScreen({ initialDate, initialWeight, initialNotes, en
         <Controller
           control={control}
           name="weight_kg"
-          render={({ field: { onChange, value } }) => (
+          render={({ field: { onChange } }) => (
             <TextInput
               ref={weightInputRef}
               style={[s.input, errors.weight_kg && s.inputError]}
@@ -111,25 +108,6 @@ export default function LogScreen({ initialDate, initialWeight, initialNotes, en
           )}
         />
         {errors.weight_kg && <Text style={s.fieldError}>{errors.weight_kg.message}</Text>}
-
-        <Text style={s.label}>Notes <Text style={s.optional}>(optional)</Text></Text>
-        <Controller
-          control={control}
-          name="notes"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              style={[s.input, s.textarea, errors.notes && s.inputError]}
-              onChangeText={onChange}
-              value={value ?? ''}
-              multiline
-              numberOfLines={3}
-              maxLength={500}
-              placeholder="How are you feeling today?"
-              placeholderTextColor={colors.textSecondary}
-              textAlignVertical="top"
-            />
-          )}
-        />
 
         <TouchableOpacity
           style={[s.btn, isSubmitting && s.btnDisabled]}
@@ -151,13 +129,11 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { flexGrow: 1, padding: 20 },
     heading: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 24 },
     label: { fontSize: 14, fontWeight: '500', color: colors.text, marginBottom: 6 },
-    optional: { color: colors.textSecondary, fontWeight: '400' },
     input: {
       borderWidth: 1, borderColor: colors.border, borderRadius: 10,
       paddingHorizontal: 14, paddingVertical: 12, fontSize: 16,
       backgroundColor: colors.inputBg, color: colors.text, marginBottom: 4,
     },
-    textarea: { height: 80 },
     inputError: { borderColor: '#ef4444' },
     fieldError: { fontSize: 13, color: '#ef4444', marginBottom: 12 },
     serverError: {

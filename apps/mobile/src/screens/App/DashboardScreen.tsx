@@ -1,16 +1,16 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Dimensions, ActivityIndicator,
+  Dimensions, ActivityIndicator, Modal,
 } from 'react-native'
 import DateRangePicker from '../../components/DateRangePicker'
 import { useFocusEffect } from '@react-navigation/native'
-import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { VictoryLine, VictoryChart, VictoryAxis, VictoryScatter, VictoryTooltip, VictoryVoronoiContainer } from 'victory-native'
 import { getDateRange, formatDate, formatWeight, type DateFilter } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
+import LogScreen from './LogScreen'
 
 type ChartFilter = DateFilter | 'year'
 const FILTERS: { label: string; value: ChartFilter }[] = [
@@ -26,9 +26,7 @@ const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov
 
 interface LogEntry { id: string; weight_kg: number; logged_at: string }
 
-type Props = { navigation: BottomTabNavigationProp<any> }
-
-export default function DashboardScreen({ navigation }: Props) {
+export default function DashboardScreen() {
   const { user } = useAuth()
   const { colors, dark } = useTheme()
   const s = makeStyles(colors)
@@ -39,8 +37,9 @@ export default function DashboardScreen({ navigation }: Props) {
   const [selectedYear, setSelectedYear] = useState(currentYear)
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
+  const [logVisible, setLogVisible] = useState(false)
 
-  useFocusEffect(useCallback(() => {
+  const loadLogs = useCallback(() => {
     if (!user) return
     supabase
       .from('weight_logs')
@@ -48,7 +47,9 @@ export default function DashboardScreen({ navigation }: Props) {
       .eq('user_id', user.id)
       .order('logged_at', { ascending: true })
       .then(({ data }) => { setLogs(data ?? []); setLoading(false) })
-  }, [user]))
+  }, [user])
+
+  useFocusEffect(loadLogs)
 
   const earliestYear = logs.length > 0
     ? Math.min(...logs.map(l => parseInt(l.logged_at.slice(0, 4))))
@@ -189,10 +190,22 @@ export default function DashboardScreen({ navigation }: Props) {
     </ScrollView>
 
     <View style={s.bottomBar}>
-      <TouchableOpacity style={s.logBtn} onPress={() => navigation.navigate('Log')} activeOpacity={0.85}>
+      <TouchableOpacity style={s.logBtn} onPress={() => setLogVisible(true)} activeOpacity={0.85}>
         <Text style={s.logBtnText}>+ Log Weight</Text>
       </TouchableOpacity>
     </View>
+
+    <Modal visible={logVisible} animationType="slide" onRequestClose={() => setLogVisible(false)}>
+      <View style={{ flex: 1, backgroundColor: colors.bg }}>
+        <TouchableOpacity style={s.closeBtn} onPress={() => setLogVisible(false)}>
+          <Text style={s.closeBtnText}>Cancel</Text>
+        </TouchableOpacity>
+        <LogScreen
+          onSuccess={() => { setLogVisible(false); loadLogs() }}
+          showHeading
+        />
+      </View>
+    </Modal>
     </View>
   )
 }
@@ -203,6 +216,8 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { flex: 1 },
     content: { padding: 16, paddingBottom: 16 },
     bottomBar: { padding: 16, paddingBottom: 24, backgroundColor: colors.bg },
+    closeBtn: { padding: 16 },
+    closeBtnText: { color: '#2563eb', fontSize: 16 },
     logBtn: {
       backgroundColor: '#2563eb', borderRadius: 14, paddingVertical: 18,
       alignItems: 'center',

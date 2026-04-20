@@ -81,7 +81,6 @@ export default function CalendarScreen() {
               entryId={modalEntry?.id}
               initialDate={modalDate}
               initialWeight={modalEntry?.weight_kg}
-              initialNotes={modalEntry?.notes}
               onSuccess={() => { setModalDate(null); fetchAll() }}
               showHeading
             />

@@ -1,17 +1,15 @@
-import React, { useRef, useCallback } from 'react'
+import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { useFocusEffect } from '@react-navigation/native'
 import { StatusBar } from 'expo-status-bar'
-import { ActivityIndicator, View, TextInput } from 'react-native'
+import { ActivityIndicator, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { ThemeProvider, useTheme } from './src/context/ThemeContext'
 import { AuthProvider, useAuth } from './src/context/AuthContext'
 import LoginScreen from './src/screens/Auth/LoginScreen'
 import RegisterScreen from './src/screens/Auth/RegisterScreen'
 import DashboardScreen from './src/screens/App/DashboardScreen'
-import LogScreen from './src/screens/App/LogScreen'
 import HistoryScreen from './src/screens/App/HistoryScreen'
 import CalendarScreen from './src/screens/App/CalendarScreen'
 import SettingsScreen from './src/screens/App/SettingsScreen'
@@ -28,16 +26,6 @@ function AuthNavigator() {
   )
 }
 
-function LogTabScreen() {
-  const weightInputRef = useRef<TextInput>(null)
-  useFocusEffect(useCallback(() => {
-    const t = setTimeout(() => weightInputRef.current?.focus(), 100)
-    return () => clearTimeout(t)
-  }, []))
-  return <LogScreen weightInputRef={weightInputRef} />
-}
-
-
 function AppNavigator() {
   const { colors, dark } = useTheme()
   return (
@@ -52,7 +40,6 @@ function AppNavigator() {
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, [string, string]> = {
             Dashboard: ['home', 'home-outline'],
-            Log: ['add-circle', 'add-circle-outline'],
             History: ['list', 'list-outline'],
             Calendar: ['calendar', 'calendar-outline'],
             Settings: ['settings', 'settings-outline'],
@@ -63,7 +50,6 @@ function AppNavigator() {
       })}
     >
       <AppTab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Dashboard' }} />
-      <AppTab.Screen name="Log" component={LogTabScreen} options={{ title: 'Log Weight' }} />
       <AppTab.Screen name="History" component={HistoryScreen} options={{ title: 'History' }} />
       <AppTab.Screen name="Calendar" component={CalendarScreen} options={{ title: 'Calendar' }} />
       <AppTab.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
