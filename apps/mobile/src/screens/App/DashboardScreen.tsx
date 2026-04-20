@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Dimensions, ActivityIndicator, TextInput,
+  Dimensions, ActivityIndicator,
 } from 'react-native'
+import DateRangePicker from '../../components/DateRangePicker'
 import { useFocusEffect } from '@react-navigation/native'
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { VictoryLine, VictoryChart, VictoryAxis, VictoryScatter, VictoryTooltip, VictoryVoronoiContainer } from 'victory-native'
@@ -112,25 +113,11 @@ export default function DashboardScreen({ navigation }: Props) {
       )}
 
       {filter === 'custom' && (
-        <View style={s.customRow}>
-          <TextInput
-            style={s.dateInput}
-            value={customFrom}
-            onChangeText={setCustomFrom}
-            placeholder="From YYYY-MM-DD"
-            placeholderTextColor={colors.textSecondary}
-            maxLength={10}
-          />
-          <Text style={s.dateSep}>→</Text>
-          <TextInput
-            style={s.dateInput}
-            value={customTo}
-            onChangeText={setCustomTo}
-            placeholder="To YYYY-MM-DD"
-            placeholderTextColor={colors.textSecondary}
-            maxLength={10}
-          />
-        </View>
+        <DateRangePicker
+          from={customFrom}
+          to={customTo}
+          onChange={(f, t) => { setCustomFrom(f); setCustomTo(t) }}
+        />
       )}
 
       <View style={s.card}>
@@ -226,11 +213,11 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     filterScroll: { flexGrow: 0, marginBottom: 12 },
     filterRow: { flexDirection: 'row', gap: 8 },
     filterBtn: {
-      paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
+      paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20,
       borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
     },
     filterBtnActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-    filterText: { fontSize: 13, fontWeight: '500', color: colors.text },
+    filterText: { fontSize: 13, fontWeight: '500', color: colors.text, lineHeight: 18, includeFontPadding: false },
     filterTextActive: { color: '#fff' },
     yearNav: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
@@ -240,15 +227,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     yearArrowDisabled: { opacity: 0.25 },
     yearArrowText: { fontSize: 26, fontWeight: '600', color: '#2563eb' },
     yearLabel: { fontSize: 18, fontWeight: '700', color: colors.text, minWidth: 56, textAlign: 'center' },
-    customRow: {
-      flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
-    },
-    dateInput: {
-      flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 8,
-      paddingHorizontal: 12, paddingVertical: 8, fontSize: 13,
-      color: colors.text, backgroundColor: colors.surface,
-    },
-    dateSep: { color: colors.textSecondary, fontSize: 14 },
     card: {
       backgroundColor: colors.surface, borderRadius: 16, padding: 12,
       shadowColor: '#000', shadowOffset: { width: 0, height: 1 },

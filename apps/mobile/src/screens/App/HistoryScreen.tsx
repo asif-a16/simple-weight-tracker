@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  Modal, Alert, ActivityIndicator, ScrollView, TextInput,
+  Modal, Alert, ActivityIndicator, ScrollView,
 } from 'react-native'
+import DateRangePicker from '../../components/DateRangePicker'
 import * as Sharing from 'expo-sharing'
 import * as FileSystem from 'expo-file-system'
 import { formatDate, formatWeight, toCSV, getDateRange, type WeightLog, type DateFilter } from '@simple-wt/shared'
@@ -95,22 +96,10 @@ export default function HistoryScreen() {
 
       {filter === 'custom' && (
         <View style={s.customRow}>
-          <TextInput
-            style={s.dateInput}
-            value={customFrom}
-            onChangeText={setCustomFrom}
-            placeholder="From YYYY-MM-DD"
-            placeholderTextColor={colors.textSecondary}
-            maxLength={10}
-          />
-          <Text style={s.dateSep}>→</Text>
-          <TextInput
-            style={s.dateInput}
-            value={customTo}
-            onChangeText={setCustomTo}
-            placeholder="To YYYY-MM-DD"
-            placeholderTextColor={colors.textSecondary}
-            maxLength={10}
+          <DateRangePicker
+            from={customFrom}
+            to={customTo}
+            onChange={(f, t) => { setCustomFrom(f); setCustomTo(t) }}
           />
         </View>
       )}
@@ -177,18 +166,12 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     filterScroll: { flexGrow: 0, paddingTop: 12 },
     filterRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingBottom: 8 },
     filterBtn: {
-      paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
+      paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20,
       borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
     },
     filterBtnActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-    filterText: { fontSize: 13, fontWeight: '500', color: colors.text },
-    customRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingBottom: 8 },
-    dateInput: {
-      flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 8,
-      paddingHorizontal: 12, paddingVertical: 8, fontSize: 13,
-      color: colors.text, backgroundColor: colors.surface,
-    },
-    dateSep: { color: colors.textSecondary, fontSize: 14 },
+    filterText: { fontSize: 13, fontWeight: '500', color: colors.text, lineHeight: 18, includeFontPadding: false },
+    customRow: { paddingHorizontal: 16, paddingBottom: 8 },
     filterTextActive: { color: '#fff' },
     exportBtn: {
       margin: 16, marginBottom: 8, paddingVertical: 10, borderRadius: 10,

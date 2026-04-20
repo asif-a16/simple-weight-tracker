@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { formatDate, formatWeight, toCSV, getDateRange, type WeightLog, type DateFilter } from '@simple-wt/shared'
 import { createClient } from '@/lib/supabase/client'
 import LogWeightForm from '@/components/weight/LogWeightForm'
+import DateRangePicker from '@/components/ui/DateRangePicker'
 
 type HistoryFilter = DateFilter
 const FILTERS: { label: string; value: HistoryFilter }[] = [
@@ -71,7 +72,7 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
           <button
             key={value}
             onClick={() => setFilter(value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               filter === value
                 ? 'bg-blue-600 text-white'
                 : 'bg-white dark:bg-[#1B1D1E] border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -83,22 +84,12 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
       </div>
 
       {filter === 'custom' && (
-        <div className="flex items-center gap-2 mb-4">
-          <input
-            type="date"
-            value={customFrom}
-            max={customTo || today}
-            onChange={(e) => setCustomFrom(e.target.value)}
-            className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#1B1D1E] focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <span className="text-gray-500 dark:text-gray-400 text-sm">to</span>
-          <input
-            type="date"
-            value={customTo}
-            min={customFrom}
+        <div className="mb-4">
+          <DateRangePicker
+            from={customFrom}
+            to={customTo}
             max={today}
-            onChange={(e) => setCustomTo(e.target.value)}
-            className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#1B1D1E] focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(f, t) => { setCustomFrom(f); setCustomTo(t) }}
           />
         </div>
       )}

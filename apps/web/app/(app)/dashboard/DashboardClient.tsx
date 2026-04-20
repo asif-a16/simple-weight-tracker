@@ -5,6 +5,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Dot
 } from 'recharts'
 import { getDateRange, formatDate, formatWeight, type DateFilter } from '@simple-wt/shared'
+import DateRangePicker from '@/components/ui/DateRangePicker'
 
 interface LogEntry {
   id: string
@@ -69,7 +70,7 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
           <button
             key={value}
             onClick={() => setFilter(value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               filter === value
                 ? 'bg-blue-600 text-white'
                 : 'bg-white dark:bg-[#1B1D1E] border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -96,22 +97,12 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
         )}
 
         {filter === 'custom' && (
-          <div className="flex items-center gap-2 mt-2 w-full sm:w-auto sm:mt-0">
-            <input
-              type="date"
-              value={customFrom}
-              max={customTo || today}
-              onChange={(e) => setCustomFrom(e.target.value)}
-              className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#1B1D1E] focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <span className="text-gray-500 dark:text-gray-400 text-sm">to</span>
-            <input
-              type="date"
-              value={customTo}
-              min={customFrom}
+          <div className="mt-2 w-full sm:w-auto sm:mt-0">
+            <DateRangePicker
+              from={customFrom}
+              to={customTo}
               max={today}
-              onChange={(e) => setCustomTo(e.target.value)}
-              className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#1B1D1E] focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(f, t) => { setCustomFrom(f); setCustomTo(t) }}
             />
           </div>
         )}
