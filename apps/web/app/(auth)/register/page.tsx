@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
@@ -9,7 +8,6 @@ import { registerSchema, type RegisterInput } from '@simple-wt/shared'
 import { createClient } from '@/lib/supabase/client'
 
 export default function RegisterPage() {
-  const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
   const [confirmed, setConfirmed] = useState(false)
 
