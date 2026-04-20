@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert,
+  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert, Modal, Pressable,
 } from 'react-native'
+import { Calendar } from 'react-native-calendars'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { weightLogSchema, type WeightLogInput } from '@simple-wt/shared'
@@ -24,6 +25,7 @@ export default function LogScreen({ initialDate, initialWeight, entryId, onSucce
   const today = new Date().toISOString().slice(0, 10)
   const [serverError, setServerError] = useState<string | null>(null)
   const [weightText, setWeightText] = useState(initialWeight?.toString() ?? '')
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
   const { user } = useAuth()
   const { colors } = useTheme()
   const s = makeStyles(colors)
@@ -71,16 +73,48 @@ export default function LogScreen({ initialDate, initialWeight, entryId, onSucce
       <Controller
         control={control}
         name="logged_at"
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            style={[s.input, errors.logged_at && s.inputError]}
-            onChangeText={onChange}
-            value={value}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={colors.textSecondary}
-            maxLength={10}
-          />
-        )}
+        render={({ field: { onChange, value } }) => {
+          const display = value
+            ? new Date(value + 'T00:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+            : 'Select date'
+          return (
+            <>
+              <TouchableOpacity
+                style={[s.input, s.dateBtn, errors.logged_at && s.inputError]}
+                onPress={() => setDatePickerOpen(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={[s.dateBtnText, !value && { color: colors.textSecondary }]}>{display}</Text>
+                <Text style={s.dateChevron}>▾</Text>
+              </TouchableOpacity>
+              <Modal visible={datePickerOpen} transparent animationType="fade" onRequestClose={() => setDatePickerOpen(false)}>
+                <Pressable style={s.dateOverlay} onPress={() => setDatePickerOpen(false)}>
+                  <Pressable style={s.dateCard} onPress={() => {}}>
+                    <Calendar
+                      current={value || today}
+                      maxDate={today}
+                      markedDates={value ? { [value]: { selected: true, selectedColor: '#2563eb' } } : {}}
+                      onDayPress={(day) => { onChange(day.dateString); setDatePickerOpen(false) }}
+                      theme={{
+                        calendarBackground: colors.surface,
+                        backgroundColor: colors.surface,
+                        textSectionTitleColor: colors.textSecondary,
+                        dayTextColor: colors.text,
+                        todayTextColor: '#2563eb',
+                        selectedDayBackgroundColor: '#2563eb',
+                        selectedDayTextColor: '#fff',
+                        arrowColor: '#2563eb',
+                        monthTextColor: colors.text,
+                        textMonthFontWeight: '600',
+                        textDisabledColor: colors.border,
+                      }}
+                    />
+                  </Pressable>
+                </Pressable>
+              </Modal>
+            </>
+          )
+        }}
       />
       {errors.logged_at && <Text style={s.fieldError}>{errors.logged_at.message}</Text>}
 
@@ -144,6 +178,11 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       paddingHorizontal: 14, paddingVertical: 12, fontSize: 16,
       backgroundColor: colors.inputBg, color: colors.text, marginBottom: 4,
     },
+    dateBtn: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    dateBtnText: { fontSize: 16, color: colors.text },
+    dateChevron: { fontSize: 14, color: colors.textSecondary },
+    dateOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', paddingHorizontal: 24 },
+    dateCard: { backgroundColor: colors.surface, borderRadius: 20, overflow: 'hidden' },
     inputError: { borderColor: '#ef4444' },
     fieldError: { fontSize: 13, color: '#ef4444', marginBottom: 12 },
     serverError: {
