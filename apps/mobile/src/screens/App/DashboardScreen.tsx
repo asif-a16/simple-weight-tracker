@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Dimensions, ActivityIndicator, Modal,
+  Dimensions, ActivityIndicator, Modal, Pressable, KeyboardAvoidingView, Platform,
 } from 'react-native'
 import DateRangePicker from '../../components/DateRangePicker'
 import { useFocusEffect } from '@react-navigation/native'
@@ -195,16 +195,18 @@ export default function DashboardScreen() {
       </TouchableOpacity>
     </View>
 
-    <Modal visible={logVisible} animationType="slide" onRequestClose={() => setLogVisible(false)}>
-      <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <TouchableOpacity style={s.closeBtn} onPress={() => setLogVisible(false)}>
-          <Text style={s.closeBtnText}>Cancel</Text>
-        </TouchableOpacity>
-        <LogScreen
-          onSuccess={() => { setLogVisible(false); loadLogs() }}
-          showHeading
-        />
-      </View>
+    <Modal visible={logVisible} transparent animationType="slide" onRequestClose={() => setLogVisible(false)}>
+      <KeyboardAvoidingView style={s.modalOuter} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <Pressable style={s.overlay} onPress={() => setLogVisible(false)} />
+        <View style={s.logCard}>
+          <View style={s.logCardHandle} />
+          <LogScreen
+            compact
+            showHeading
+            onSuccess={() => { setLogVisible(false); loadLogs() }}
+          />
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
     </View>
   )
@@ -216,8 +218,18 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { flex: 1 },
     content: { padding: 16, paddingBottom: 16 },
     bottomBar: { padding: 16, paddingBottom: 24, backgroundColor: colors.bg },
-    closeBtn: { padding: 16 },
-    closeBtnText: { color: '#2563eb', fontSize: 16 },
+    modalOuter: { flex: 1, justifyContent: 'flex-end' },
+    overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
+    logCard: {
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: 24, borderTopRightRadius: 24,
+      shadowColor: '#000', shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.12, shadowRadius: 16, elevation: 24,
+    },
+    logCardHandle: {
+      width: 40, height: 4, borderRadius: 2,
+      backgroundColor: colors.border, alignSelf: 'center', marginTop: 12, marginBottom: 4,
+    },
     logBtn: {
       backgroundColor: '#2563eb', borderRadius: 14, paddingVertical: 18,
       alignItems: 'center',

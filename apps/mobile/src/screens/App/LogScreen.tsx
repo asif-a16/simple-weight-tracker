@@ -16,10 +16,11 @@ interface Props {
   entryId?: string
   onSuccess?: () => void
   showHeading?: boolean
+  compact?: boolean
   weightInputRef?: React.RefObject<TextInput>
 }
 
-export default function LogScreen({ initialDate, initialWeight, entryId, onSuccess, showHeading = false, weightInputRef }: Props) {
+export default function LogScreen({ initialDate, initialWeight, entryId, onSuccess, showHeading = false, compact = false, weightInputRef }: Props) {
   const today = new Date().toISOString().slice(0, 10)
   const [serverError, setServerError] = useState<string | null>(null)
   const [weightText, setWeightText] = useState(initialWeight?.toString() ?? '')
@@ -60,64 +61,72 @@ export default function LogScreen({ initialDate, initialWeight, entryId, onSucce
     onSuccess?.()
   }
 
+  const fields = (
+    <View style={compact ? s.compactContainer : s.container}>
+      {showHeading && <Text style={s.heading}>{entryId ? 'Edit Entry' : 'Log Weight'}</Text>}
+
+      {serverError && <Text style={s.serverError}>{serverError}</Text>}
+
+      <Text style={s.label}>Date</Text>
+      <Controller
+        control={control}
+        name="logged_at"
+        render={({ field: { onChange, value } }) => (
+          <TextInput
+            style={[s.input, errors.logged_at && s.inputError]}
+            onChangeText={onChange}
+            value={value}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor={colors.textSecondary}
+            maxLength={10}
+          />
+        )}
+      />
+      {errors.logged_at && <Text style={s.fieldError}>{errors.logged_at.message}</Text>}
+
+      <Text style={s.label}>Weight (kg)</Text>
+      <Controller
+        control={control}
+        name="weight_kg"
+        render={({ field: { onChange } }) => (
+          <TextInput
+            ref={weightInputRef}
+            style={[s.input, errors.weight_kg && s.inputError]}
+            onChangeText={(t) => {
+              setWeightText(t)
+              const n = parseFloat(t)
+              onChange(t === '' ? undefined : isNaN(n) ? undefined : n)
+            }}
+            value={weightText}
+            keyboardType="decimal-pad"
+            placeholder="e.g. 75.5"
+            placeholderTextColor={colors.textSecondary}
+            autoFocus
+            returnKeyType="done"
+            onSubmitEditing={handleSubmit(onSubmit)}
+          />
+        )}
+      />
+      {errors.weight_kg && <Text style={s.fieldError}>{errors.weight_kg.message}</Text>}
+
+      <TouchableOpacity
+        style={[s.btn, isSubmitting && s.btnDisabled]}
+        onPress={handleSubmit(onSubmit)}
+        disabled={isSubmitting}
+      >
+        {isSubmitting
+          ? <ActivityIndicator color="#fff" />
+          : <Text style={s.btnText}>{entryId ? 'Update entry' : 'Log weight'}</Text>}
+      </TouchableOpacity>
+    </View>
+  )
+
+  if (compact) return fields
+
   return (
     <KeyboardAvoidingView style={s.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={s.container} keyboardShouldPersistTaps="handled">
-        {showHeading && <Text style={s.heading}>{entryId ? 'Edit Entry' : 'Log Weight'}</Text>}
-
-        {serverError && <Text style={s.serverError}>{serverError}</Text>}
-
-        <Text style={s.label}>Date</Text>
-        <Controller
-          control={control}
-          name="logged_at"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              style={[s.input, errors.logged_at && s.inputError]}
-              onChangeText={onChange}
-              value={value}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={colors.textSecondary}
-              maxLength={10}
-            />
-          )}
-        />
-        {errors.logged_at && <Text style={s.fieldError}>{errors.logged_at.message}</Text>}
-
-        <Text style={s.label}>Weight (kg)</Text>
-        <Controller
-          control={control}
-          name="weight_kg"
-          render={({ field: { onChange } }) => (
-            <TextInput
-              ref={weightInputRef}
-              style={[s.input, errors.weight_kg && s.inputError]}
-              onChangeText={(t) => {
-                setWeightText(t)
-                const n = parseFloat(t)
-                onChange(t === '' ? undefined : isNaN(n) ? undefined : n)
-              }}
-              value={weightText}
-              keyboardType="decimal-pad"
-              placeholder="e.g. 75.5"
-              placeholderTextColor={colors.textSecondary}
-              autoFocus
-              returnKeyType="done"
-              onSubmitEditing={handleSubmit(onSubmit)}
-            />
-          )}
-        />
-        {errors.weight_kg && <Text style={s.fieldError}>{errors.weight_kg.message}</Text>}
-
-        <TouchableOpacity
-          style={[s.btn, isSubmitting && s.btnDisabled]}
-          onPress={handleSubmit(onSubmit)}
-          disabled={isSubmitting}
-        >
-          {isSubmitting
-            ? <ActivityIndicator color="#fff" />
-            : <Text style={s.btnText}>{entryId ? 'Update entry' : 'Log weight'}</Text>}
-        </TouchableOpacity>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        {fields}
       </ScrollView>
     </KeyboardAvoidingView>
   )
@@ -127,6 +136,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     flex: { flex: 1, backgroundColor: colors.bg },
     container: { flexGrow: 1, padding: 20 },
+    compactContainer: { padding: 20 },
     heading: { fontSize: 24, fontWeight: '700', color: colors.text, marginBottom: 24 },
     label: { fontSize: 14, fontWeight: '500', color: colors.text, marginBottom: 6 },
     input: {
