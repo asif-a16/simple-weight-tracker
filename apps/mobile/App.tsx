@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useFocusEffect } from '@react-navigation/native'
 import { StatusBar } from 'expo-status-bar'
-import { ActivityIndicator, TouchableOpacity, Text, View, TextInput } from 'react-native'
+import { ActivityIndicator, View, TextInput } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { ThemeProvider, useTheme } from './src/context/ThemeContext'
 import { AuthProvider, useAuth } from './src/context/AuthContext'
@@ -14,6 +14,7 @@ import DashboardScreen from './src/screens/App/DashboardScreen'
 import LogScreen from './src/screens/App/LogScreen'
 import HistoryScreen from './src/screens/App/HistoryScreen'
 import CalendarScreen from './src/screens/App/CalendarScreen'
+import SettingsScreen from './src/screens/App/SettingsScreen'
 
 const AuthStack = createNativeStackNavigator()
 const AppTab = createBottomTabNavigator()
@@ -36,14 +37,6 @@ function LogTabScreen() {
   return <LogScreen weightInputRef={weightInputRef} />
 }
 
-function DarkModeToggle() {
-  const { dark, toggle } = useTheme()
-  return (
-    <TouchableOpacity onPress={toggle} style={{ marginRight: 16 }}>
-      <Text style={{ fontSize: 18 }}>{dark ? '☀' : '☾'}</Text>
-    </TouchableOpacity>
-  )
-}
 
 function AppNavigator() {
   const { colors, dark } = useTheme()
@@ -56,13 +49,13 @@ function AppNavigator() {
         headerStyle: { backgroundColor: colors.surface },
         headerTintColor: colors.text,
         headerShadowVisible: false,
-        headerRight: () => <DarkModeToggle />,
         tabBarIcon: ({ focused, color, size }) => {
           const icons: Record<string, [string, string]> = {
             Dashboard: ['home', 'home-outline'],
             Log: ['add-circle', 'add-circle-outline'],
             History: ['list', 'list-outline'],
             Calendar: ['calendar', 'calendar-outline'],
+            Settings: ['settings', 'settings-outline'],
           }
           const [active, inactive] = icons[route.name] ?? ['ellipse', 'ellipse-outline']
           return <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />
@@ -73,6 +66,7 @@ function AppNavigator() {
       <AppTab.Screen name="Log" component={LogTabScreen} options={{ title: 'Log Weight' }} />
       <AppTab.Screen name="History" component={HistoryScreen} options={{ title: 'History' }} />
       <AppTab.Screen name="Calendar" component={CalendarScreen} options={{ title: 'Calendar' }} />
+      <AppTab.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
     </AppTab.Navigator>
   )
 }

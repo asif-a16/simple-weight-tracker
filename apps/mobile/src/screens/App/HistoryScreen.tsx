@@ -4,9 +4,7 @@ import {
   Modal, Alert, ActivityIndicator, ScrollView,
 } from 'react-native'
 import DateRangePicker from '../../components/DateRangePicker'
-import * as Sharing from 'expo-sharing'
-import * as FileSystem from 'expo-file-system'
-import { formatDate, formatWeight, toCSV, getDateRange, type WeightLog, type DateFilter } from '@simple-wt/shared'
+import { formatDate, formatWeight, getDateRange, type WeightLog, type DateFilter } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -70,14 +68,6 @@ export default function HistoryScreen() {
     ])
   }
 
-  async function handleExport() {
-    const csv = toCSV(logs)
-    const filename = `weight-log-${new Date().toISOString().slice(0, 10)}.csv`
-    const path = FileSystem.cacheDirectory + filename
-    await FileSystem.writeAsStringAsync(path, csv, { encoding: FileSystem.EncodingType.UTF8 })
-    await Sharing.shareAsync(path, { mimeType: 'text/csv', dialogTitle: 'Export Weight Log' })
-  }
-
   if (loading) return <ActivityIndicator style={{ flex: 1 }} />
 
   return (
@@ -102,12 +92,6 @@ export default function HistoryScreen() {
             onChange={(f, t) => { setCustomFrom(f); setCustomTo(t) }}
           />
         </View>
-      )}
-
-      {logs.length > 0 && (
-        <TouchableOpacity style={s.exportBtn} onPress={handleExport}>
-          <Text style={s.exportText}>Export CSV</Text>
-        </TouchableOpacity>
       )}
 
       <FlatList
@@ -163,21 +147,17 @@ export default function HistoryScreen() {
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
-    filterScroll: { flexGrow: 0, paddingTop: 12 },
-    filterRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingBottom: 8 },
+    filterScroll: { flexGrow: 0 },
+    filterRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12, alignItems: 'center' },
     filterBtn: {
       paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20,
       borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
+      alignItems: 'center', justifyContent: 'center',
     },
     filterBtnActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
-    filterText: { fontSize: 13, fontWeight: '500', color: colors.text, lineHeight: 18, includeFontPadding: false },
+    filterText: { fontSize: 13, fontWeight: '500', color: colors.text, lineHeight: 20, includeFontPadding: false },
     customRow: { paddingHorizontal: 16, paddingBottom: 8 },
     filterTextActive: { color: '#fff' },
-    exportBtn: {
-      margin: 16, marginBottom: 8, paddingVertical: 10, borderRadius: 10,
-      borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center',
-    },
-    exportText: { fontSize: 14, fontWeight: '500', color: colors.text },
     list: { paddingHorizontal: 16, paddingBottom: 100 },
     row: {
       flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
