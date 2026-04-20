@@ -23,6 +23,7 @@ interface Props {
 export default function LogScreen({ initialDate, initialWeight, initialNotes, entryId, onSuccess, showHeading = false, weightInputRef }: Props) {
   const today = new Date().toISOString().slice(0, 10)
   const [serverError, setServerError] = useState<string | null>(null)
+  const [weightText, setWeightText] = useState(initialWeight?.toString() ?? '')
   const { user } = useAuth()
   const { colors } = useTheme()
   const s = makeStyles(colors)
@@ -94,8 +95,12 @@ export default function LogScreen({ initialDate, initialWeight, initialNotes, en
             <TextInput
               ref={weightInputRef}
               style={[s.input, errors.weight_kg && s.inputError]}
-              onChangeText={(t) => onChange(t ? parseFloat(t) : undefined)}
-              value={value?.toString() ?? ''}
+              onChangeText={(t) => {
+                setWeightText(t)
+                const n = parseFloat(t)
+                onChange(t === '' ? undefined : isNaN(n) ? undefined : n)
+              }}
+              value={weightText}
               keyboardType="decimal-pad"
               placeholder="e.g. 75.5"
               placeholderTextColor={colors.textSecondary}
