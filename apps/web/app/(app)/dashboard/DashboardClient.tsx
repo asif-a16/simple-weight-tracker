@@ -133,7 +133,8 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
             <p className="text-gray-400 dark:text-gray-500">No data for this period</p>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={300}>
+          <div className="h-56 sm:h-64 md:h-72 lg:h-80 xl:h-96 2xl:h-[480px]">
+          <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
               <XAxis
@@ -177,6 +178,7 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
               />
             </LineChart>
           </ResponsiveContainer>
+          </div>
         )}
       </div>
 
