@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert, Modal, Pressable,
+  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Modal, Pressable,
 } from 'react-native'
 import { Calendar } from 'react-native-calendars'
 import { useForm, Controller } from 'react-hook-form'
@@ -55,7 +55,6 @@ export default function LogScreen({ initialDate, initialWeight, entryId, onSucce
       }
       return
     }
-    Alert.alert('Success', entryId ? 'Entry updated!' : 'Weight logged!')
     if (!entryId) {
       reset({ logged_at: today })
       setWeightText('')

@@ -1,7 +1,7 @@
 import React, { useRef, useState, useMemo, useCallback } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
-  Dimensions, ActivityIndicator, Modal, Pressable, KeyboardAvoidingView, Platform,
+  Dimensions, ActivityIndicator, Modal, Pressable, KeyboardAvoidingView, Platform, Animated,
 } from 'react-native'
 import DateRangePicker from '../../components/DateRangePicker'
 import { useFocusEffect } from '@react-navigation/native'
@@ -39,6 +39,15 @@ export default function DashboardScreen() {
   const [customTo, setCustomTo] = useState('')
   const [logVisible, setLogVisible] = useState(false)
   const weightInputRef = useRef<TextInput>(null)
+  const toastOpacity = useRef(new Animated.Value(0)).current
+
+  function showToast() {
+    Animated.sequence([
+      Animated.timing(toastOpacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+      Animated.delay(1500),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start()
+  }
 
   const loadLogs = useCallback(() => {
     if (!user) return
@@ -205,11 +214,15 @@ export default function DashboardScreen() {
             compact
             showHeading
             weightInputRef={weightInputRef}
-            onSuccess={() => { setLogVisible(false); loadLogs() }}
+            onSuccess={() => { setLogVisible(false); loadLogs(); showToast() }}
           />
         </View>
       </KeyboardAvoidingView>
     </Modal>
+
+    <Animated.View style={[s.toast, { opacity: toastOpacity }]} pointerEvents="none">
+      <Text style={s.toastText}>Weight logged!</Text>
+    </Animated.View>
     </View>
   )
 }
@@ -268,5 +281,11 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     },
     statValue: { fontSize: 20, fontWeight: '700', color: colors.text },
     statLabel: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+    toast: {
+      position: 'absolute', bottom: 100, alignSelf: 'center',
+      backgroundColor: '#1f2937', borderRadius: 24,
+      paddingHorizontal: 20, paddingVertical: 10,
+    },
+    toastText: { color: '#fff', fontSize: 14, fontWeight: '500' },
   })
 }
