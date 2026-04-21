@@ -6,7 +6,7 @@ export default async function HistoryPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   const PAGE = 1000
-  const results: { id: string; weight_kg: number; logged_at: string; notes: string | null; user_id: string }[] = []
+  const results: { id: string; weight_kg: number; logged_at: string; notes: string | null; user_id: string; created_at: string; updated_at: string }[] = []
   let from = 0
   while (true) {
     const { data } = await supabase
