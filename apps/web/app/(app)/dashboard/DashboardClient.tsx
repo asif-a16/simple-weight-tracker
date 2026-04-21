@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Dot
 } from 'recharts'
-import { getDateRange, formatDate, formatWeight, type DateFilter } from '@simple-wt/shared'
+import { getDateRange, formatDate, formatWeight, calcTrend, type DateFilter } from '@simple-wt/shared'
 import DateRangePicker from '@/components/ui/DateRangePicker'
 
 interface LogEntry {
@@ -51,12 +51,7 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
     return logs.filter((l) => l.logged_at >= range.from && l.logged_at <= range.to)
   }, [logs, filter, customFrom, customTo, selectedYear])
 
-  const trendData = useMemo(() => {
-    if (filtered.length < 2) return null
-    const diff = filtered[filtered.length - 1].weight_kg - filtered[0].weight_kg
-    const pct = (diff / filtered[0].weight_kg) * 100
-    return { diff, pct }
-  }, [filtered])
+  const trendData = useMemo(() => calcTrend(filtered), [filtered])
 
   const chartData = filtered.map((l) => ({
     date: l.logged_at,

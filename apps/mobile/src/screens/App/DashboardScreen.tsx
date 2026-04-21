@@ -6,7 +6,7 @@ import {
 import DateRangePicker from '../../components/DateRangePicker'
 import { useFocusEffect } from '@react-navigation/native'
 import { VictoryLine, VictoryChart, VictoryAxis, VictoryScatter, VictoryTooltip, VictoryVoronoiContainer } from 'victory-native'
-import { getDateRange, formatDate, formatWeight, type DateFilter } from '@simple-wt/shared'
+import { getDateRange, formatDate, formatWeight, calcTrend, type DateFilter } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -89,12 +89,7 @@ export default function DashboardScreen() {
     return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
   }, [logs, filter, selectedYear, customFrom, customTo])
 
-  const trendData = useMemo(() => {
-    if (filtered.length < 2) return null
-    const diff = filtered[filtered.length - 1].weight_kg - filtered[0].weight_kg
-    const pct = (diff / filtered[0].weight_kg) * 100
-    return { diff, pct }
-  }, [filtered])
+  const trendData = useMemo(() => calcTrend(filtered), [filtered])
 
   const chartData = filtered.map((l) => ({ x: l.logged_at, y: l.weight_kg }))
   const weights = filtered.map((l) => l.weight_kg)

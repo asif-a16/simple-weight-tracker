@@ -63,6 +63,60 @@ function parseImportDate(s: string): string | null {
   return null
 }
 
+export interface TrendResult {
+  diff: number
+  pct: number
+}
+
+export function calcTrend(logs: { weight_kg: number }[]): TrendResult | null {
+  if (logs.length < 2) return null
+  const first = logs[0].weight_kg
+  const last = logs[logs.length - 1].weight_kg
+  const diff = last - first
+  const pct = (diff / first) * 100
+  return { diff, pct }
+}
+
+export function getWeekStart(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const date = new Date(Date.UTC(y, m - 1, d))
+  const dow = date.getUTCDay()
+  date.setUTCDate(date.getUTCDate() + (dow === 0 ? -6 : 1 - dow))
+  return date.toISOString().slice(0, 10)
+}
+
+export function getWeekEnd(weekStart: string): string {
+  const [y, m, d] = weekStart.split('-').map(Number)
+  const date = new Date(Date.UTC(y, m - 1, d))
+  date.setUTCDate(date.getUTCDate() + 6)
+  return date.toISOString().slice(0, 10)
+}
+
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+export function formatWeekLabel(weekStart: string): string {
+  const weekEnd = getWeekEnd(weekStart)
+  const fmt = (s: string) => {
+    const [, m, d] = s.split('-').map(Number)
+    return `${d} ${SHORT_MONTHS[m - 1]}`
+  }
+  return `${fmt(weekStart)} – ${fmt(weekEnd)}`
+}
+
+export function groupByWeek<T extends { logged_at: string }>(
+  logs: T[]
+): { label: string; weekStart: string; entries: T[] }[] {
+  const map = new Map<string, T[]>()
+  for (const log of logs) {
+    const ws = getWeekStart(log.logged_at)
+    if (!map.has(ws)) map.set(ws, [])
+    map.get(ws)!.push(log)
+  }
+  return Array.from(map.entries())
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([ws, entries]) => ({ weekStart: ws, label: formatWeekLabel(ws), entries }))
+}
+
 export function toCSV(logs: { logged_at: string; weight_kg: number; notes: string | null }[]): string {
   const header = 'Date,Weight (kg),Notes'
   const rows = [...logs]

@@ -40,7 +40,52 @@
       "Bash(../../node_modules/.bin/react-native bundle *)",
       "Bash(node ../../node_modules/expo/bin/cli export:embed --platform android --entry-file index.ts --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res)",
       "Bash(node ../../node_modules/expo/bin/cli export:embed --platform android --dev false --entry-file index.ts --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res)",
-      "Bash(node ../../node_modules/expo/bin/cli prebuild --platform android)"
+      "Bash(node ../../node_modules/expo/bin/cli prebuild --platform android)",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" add apps/web/app/\\\\\\(app\\\\\\)/history/page.tsx)",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" commit -m \"Fix no-explicit-any type error in history page\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" add \"apps/web/app/\\(app\\)/history/page.tsx\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" commit -m \"Fix WeightLog type missing created_at and updated_at fields\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" add \"apps/web/app/\\(app\\)/dashboard/DashboardClient.tsx\" \"apps/mobile/src/screens/App/DashboardScreen.tsx\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" commit -m \"Hide chart dots by default, add toggle button on web and mobile\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" add \"apps/web/app/\\(app\\)/dashboard/DashboardClient.tsx\" \"apps/web/app/\\(app\\)/history/HistoryClient.tsx\" \"apps/mobile/src/screens/App/DashboardScreen.tsx\" \"apps/mobile/src/screens/App/HistoryScreen.tsx\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" commit -m \"Add trend card to dashboard, group history by week on web and mobile\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" add \"apps/web/app/\\(app\\)/history/HistoryClient.tsx\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" commit -m \"Import React for Fragment usage in HistoryClient\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" add \"apps/web/app/\\(app\\)/calendar/CalendarClient.tsx\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" commit -m \"Fix calendar minDate to use earliest log date not account creation date\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" add \"apps/mobile/src/screens/App/DashboardScreen.tsx\" \"apps/web/app/\\(app\\)/dashboard/DashboardClient.tsx\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" commit -m \"Move kg unit to Min/Max labels, fix trend card top margin\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" commit -m \"Move period change card above stat cards on web and mobile\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" add \"apps/web/app/\\(app\\)/dashboard/DashboardClient.tsx\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" commit -m \"Make dashboard chart height responsive to screen size\")",
+      "Bash(pnpm --filter web dev)",
+      "Bash(node \"../../node_modules/next/dist/bin/next\" dev)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" add \"apps/web/app/\\(app\\)/dashboard/page.tsx\" \"apps/web/package.json\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" commit -m \"Remove max-width cap on dashboard so chart fills screen width\")",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" add README.md)",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" commit -m \"Add README\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k: d.get\\(k,{}\\) for k in ['jest','scripts','devDependencies']}, indent=2\\)\\)\")",
+      "Bash(pnpm test *)",
+      "Bash(node ../../node_modules/.bin/playwright install chromium)",
+      "Bash(node \"../../node_modules/@playwright/test/node_modules/.bin/playwright\" install chromium)",
+      "Bash(node \"../../node_modules/playwright/cli.js\" install chromium)",
+      "Bash(node_modules/.bin/playwright install *)",
+      "Bash(pnpm test:unit)",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" add -A)",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" commit -m \"Add tests: Vitest unit tests for shared utils/schemas, Playwright e2e for web\")"
+    ]
+  },
+  "hooks": {
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '/caveman'"
+          }
+        ]
+      }
     ]
   }
 }

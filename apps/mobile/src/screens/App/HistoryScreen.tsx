@@ -4,33 +4,11 @@ import {
   Modal, Alert, ActivityIndicator, ScrollView,
 } from 'react-native'
 import DateRangePicker from '../../components/DateRangePicker'
-import { formatDate, formatWeight, getDateRange, type WeightLog, type DateFilter } from '@simple-wt/shared'
+import { formatDate, formatWeight, getDateRange, groupByWeek, type WeightLog, type DateFilter } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 import LogScreen from './LogScreen'
-
-function getWeekStart(dateStr: string): string {
-  const [y, m, d] = dateStr.split('-').map(Number)
-  const date = new Date(Date.UTC(y, m - 1, d))
-  const dow = date.getUTCDay()
-  date.setUTCDate(date.getUTCDate() + (dow === 0 ? -6 : 1 - dow))
-  return date.toISOString().slice(0, 10)
-}
-
-function getWeekEnd(weekStart: string): string {
-  const [y, m, d] = weekStart.split('-').map(Number)
-  const date = new Date(Date.UTC(y, m - 1, d))
-  date.setUTCDate(date.getUTCDate() + 6)
-  return date.toISOString().slice(0, 10)
-}
-
-const SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-
-function fmtShort(dateStr: string): string {
-  const [, m, d] = dateStr.split('-').map(Number)
-  return `${d} ${SHORT_MONTHS[m - 1]}`
-}
 
 type HistoryFilter = DateFilter
 const FILTERS: { label: string; value: HistoryFilter }[] = [
@@ -86,20 +64,9 @@ export default function HistoryScreen() {
     return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
   }, [logs, filter, customFrom, customTo])
 
-  const sections = useMemo(() => {
-    const map = new Map<string, WeightLog[]>()
-    for (const log of filtered) {
-      const ws = getWeekStart(log.logged_at)
-      if (!map.has(ws)) map.set(ws, [])
-      map.get(ws)!.push(log)
-    }
-    return Array.from(map.entries())
-      .sort(([a], [b]) => b.localeCompare(a))
-      .map(([ws, data]) => ({
-        title: `${fmtShort(ws)} – ${fmtShort(getWeekEnd(ws))}`,
-        data,
-      }))
-  }, [filtered])
+  const sections = useMemo(() =>
+    groupByWeek(filtered).map(({ label, entries }) => ({ title: label, data: entries }))
+  , [filtered])
 
   async function handleDelete(id: string) {
     Alert.alert('Delete entry?', 'This action cannot be undone.', [

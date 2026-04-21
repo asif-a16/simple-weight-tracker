@@ -3,47 +3,10 @@
 import React, { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { formatDate, formatWeight, toCSV, getDateRange, type WeightLog, type DateFilter } from '@simple-wt/shared'
+import { formatDate, formatWeight, toCSV, getDateRange, groupByWeek, type WeightLog, type DateFilter } from '@simple-wt/shared'
 import { createClient } from '@/lib/supabase/client'
 import LogWeightForm from '@/components/weight/LogWeightForm'
 import DateRangePicker from '@/components/ui/DateRangePicker'
-
-function getWeekStart(dateStr: string): string {
-  const [y, m, d] = dateStr.split('-').map(Number)
-  const date = new Date(Date.UTC(y, m - 1, d))
-  const dow = date.getUTCDay()
-  date.setUTCDate(date.getUTCDate() + (dow === 0 ? -6 : 1 - dow))
-  return date.toISOString().slice(0, 10)
-}
-
-function getWeekEnd(weekStart: string): string {
-  const [y, m, d] = weekStart.split('-').map(Number)
-  const date = new Date(Date.UTC(y, m - 1, d))
-  date.setUTCDate(date.getUTCDate() + 6)
-  return date.toISOString().slice(0, 10)
-}
-
-const SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-
-function fmtShort(dateStr: string): string {
-  const [, m, d] = dateStr.split('-').map(Number)
-  return `${d} ${SHORT_MONTHS[m - 1]}`
-}
-
-function groupByWeek<T extends { logged_at: string }>(logs: T[]): { label: string; entries: T[] }[] {
-  const map = new Map<string, T[]>()
-  for (const log of logs) {
-    const ws = getWeekStart(log.logged_at)
-    if (!map.has(ws)) map.set(ws, [])
-    map.get(ws)!.push(log)
-  }
-  return Array.from(map.entries())
-    .sort(([a], [b]) => b.localeCompare(a))
-    .map(([ws, entries]) => ({
-      label: `${fmtShort(ws)} – ${fmtShort(getWeekEnd(ws))}`,
-      entries,
-    }))
-}
 
 type HistoryFilter = DateFilter
 const FILTERS: { label: string; value: HistoryFilter }[] = [

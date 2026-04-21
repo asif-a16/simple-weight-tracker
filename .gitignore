@@ -41,3 +41,4 @@ Thumbs.db
 # Supabase
 supabase/.branches
 supabase/.temp
+apps/web/e2e/.auth.json
