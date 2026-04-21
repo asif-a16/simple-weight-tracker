@@ -183,18 +183,6 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
       {/* Summary stats */}
       {filtered.length > 0 && (
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { label: 'Entries', value: filtered.length },
-              { label: 'Min (kg)', value: Math.min(...weights).toFixed(1) },
-              { label: 'Max (kg)', value: Math.max(...weights).toFixed(1) },
-            ].map(({ label, value }) => (
-              <div key={label} className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 text-center">
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{label}</p>
-              </div>
-            ))}
-          </div>
           {trendData && (() => {
             const isDown = trendData.diff < 0
             const isUp = trendData.diff > 0
@@ -219,6 +207,18 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
               </div>
             )
           })()}
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { label: 'Entries', value: filtered.length },
+              { label: 'Min (kg)', value: Math.min(...weights).toFixed(1) },
+              { label: 'Max (kg)', value: Math.max(...weights).toFixed(1) },
+            ].map(({ label, value }) => (
+              <div key={label} className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 text-center">
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

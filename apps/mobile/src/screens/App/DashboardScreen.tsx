@@ -211,20 +211,6 @@ export default function DashboardScreen() {
         )}
       </View>
 
-      {filtered.length > 0 && (
-        <View style={s.statsRow}>
-          {[
-            { label: 'Entries', value: filtered.length.toString() },
-            { label: 'Min (kg)', value: Math.min(...weights).toFixed(1) },
-            { label: 'Max (kg)', value: Math.max(...weights).toFixed(1) },
-          ].map(({ label, value }) => (
-            <View key={label} style={s.statCard}>
-              <Text style={s.statValue}>{value}</Text>
-              <Text style={s.statLabel}>{label}</Text>
-            </View>
-          ))}
-        </View>
-      )}
       {trendData && (() => {
         const isDown = trendData.diff < 0
         const isUp = trendData.diff > 0
@@ -246,6 +232,20 @@ export default function DashboardScreen() {
           </View>
         )
       })()}
+      {filtered.length > 0 && (
+        <View style={s.statsRow}>
+          {[
+            { label: 'Entries', value: filtered.length.toString() },
+            { label: 'Min (kg)', value: Math.min(...weights).toFixed(1) },
+            { label: 'Max (kg)', value: Math.max(...weights).toFixed(1) },
+          ].map(({ label, value }) => (
+            <View key={label} style={s.statCard}>
+              <Text style={s.statValue}>{value}</Text>
+              <Text style={s.statLabel}>{label}</Text>
+            </View>
+          ))}
+        </View>
+      )}
     </ScrollView>
 
     <View style={s.bottomBar}>
@@ -332,7 +332,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     statLabel: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
     trendCard: {
       flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-      borderRadius: 16, padding: 16, marginTop: 12, borderWidth: 1,
+      borderRadius: 16, padding: 16, marginTop: 0, marginBottom: 12, borderWidth: 1,
       shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
     },
