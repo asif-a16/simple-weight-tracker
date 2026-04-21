@@ -49,15 +49,25 @@ export default function DashboardScreen() {
     ]).start()
   }
 
-  const loadLogs = useCallback(() => {
+  const loadLogs = useCallback(async () => {
     if (!user) return
-    supabase
-      .from('weight_logs')
-      .select('id, weight_kg, logged_at')
-      .eq('user_id', user.id)
-      .order('logged_at', { ascending: true })
-      .limit(10000)
-      .then(({ data }) => { setLogs(data ?? []); setLoading(false) })
+    const PAGE = 1000
+    const results: LogEntry[] = []
+    let from = 0
+    while (true) {
+      const { data } = await supabase
+        .from('weight_logs')
+        .select('id, weight_kg, logged_at')
+        .eq('user_id', user.id)
+        .order('logged_at', { ascending: true })
+        .range(from, from + PAGE - 1)
+      if (!data?.length) break
+      results.push(...data)
+      if (data.length < PAGE) break
+      from += PAGE
+    }
+    setLogs(results)
+    setLoading(false)
   }, [user])
 
   useFocusEffect(loadLogs)

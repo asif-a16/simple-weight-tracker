@@ -33,13 +33,22 @@ export default function HistoryScreen() {
 
   const fetchLogs = useCallback(async () => {
     if (!user) return
-    const { data } = await supabase
-      .from('weight_logs')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('logged_at', { ascending: false })
-      .limit(10000)
-    setLogs(data ?? [])
+    const PAGE = 1000
+    const results: any[] = []
+    let from = 0
+    while (true) {
+      const { data } = await supabase
+        .from('weight_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('logged_at', { ascending: false })
+        .range(from, from + PAGE - 1)
+      if (!data?.length) break
+      results.push(...data)
+      if (data.length < PAGE) break
+      from += PAGE
+    }
+    setLogs(results)
     setLoading(false)
   }, [user])
 

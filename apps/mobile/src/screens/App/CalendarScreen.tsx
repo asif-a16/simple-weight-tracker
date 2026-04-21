@@ -21,11 +21,20 @@ export default function CalendarScreen() {
 
   const fetchAll = useCallback(async () => {
     if (!user) return
-    const [{ data: logData }, { data: profile }] = await Promise.all([
-      supabase.from('weight_logs').select('*').eq('user_id', user.id).order('logged_at').limit(10000),
-      supabase.from('profiles').select('created_at').eq('id', user.id).single(),
-    ])
-    setLogs(logData ?? [])
+    const PAGE = 1000
+    const results: any[] = []
+    let from = 0
+    while (true) {
+      const { data } = await supabase
+        .from('weight_logs').select('*').eq('user_id', user.id).order('logged_at')
+        .range(from, from + PAGE - 1)
+      if (!data?.length) break
+      results.push(...data)
+      if (data.length < PAGE) break
+      from += PAGE
+    }
+    const { data: profile } = await supabase.from('profiles').select('created_at').eq('id', user.id).single()
+    setLogs(results)
     setMinDate(profile?.created_at.slice(0, 10) ?? '2020-01-01')
     setLoading(false)
   }, [user])
