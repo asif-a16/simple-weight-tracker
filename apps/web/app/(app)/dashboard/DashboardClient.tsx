@@ -51,6 +51,13 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
     return logs.filter((l) => l.logged_at >= range.from && l.logged_at <= range.to)
   }, [logs, filter, customFrom, customTo, selectedYear])
 
+  const trendData = useMemo(() => {
+    if (filtered.length < 2) return null
+    const diff = filtered[filtered.length - 1].weight_kg - filtered[0].weight_kg
+    const pct = (diff / filtered[0].weight_kg) * 100
+    return { diff, pct }
+  }, [filtered])
+
   const chartData = filtered.map((l) => ({
     date: l.logged_at,
     weight: l.weight_kg,
@@ -175,17 +182,43 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
 
       {/* Summary stats */}
       {filtered.length > 0 && (
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { label: 'Entries', value: filtered.length },
-            { label: 'Min', value: formatWeight(Math.min(...weights)) },
-            { label: 'Max', value: formatWeight(Math.max(...weights)) },
-          ].map(({ label, value }) => (
-            <div key={label} className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{label}</p>
-            </div>
-          ))}
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { label: 'Entries', value: filtered.length },
+              { label: 'Min', value: formatWeight(Math.min(...weights)) },
+              { label: 'Max', value: formatWeight(Math.max(...weights)) },
+            ].map(({ label, value }) => (
+              <div key={label} className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 text-center">
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{label}</p>
+              </div>
+            ))}
+          </div>
+          {trendData && (() => {
+            const isDown = trendData.diff < 0
+            const isUp = trendData.diff > 0
+            const colorClass = isDown ? 'text-green-600 dark:text-green-400' : isUp ? 'text-red-500 dark:text-red-400' : 'text-gray-500'
+            const bgClass = isDown
+              ? 'bg-green-50 dark:bg-green-950/30 border-green-100 dark:border-green-800'
+              : isUp
+              ? 'bg-red-50 dark:bg-red-950/30 border-red-100 dark:border-red-800'
+              : 'bg-white dark:bg-[#1B1D1E] border-gray-100 dark:border-gray-700'
+            return (
+              <div className={`rounded-2xl border shadow-sm p-4 flex items-center justify-between ${bgClass}`}>
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Period change</p>
+                  <p className={`text-2xl font-bold ${colorClass}`}>
+                    {isUp ? '+' : ''}{trendData.diff.toFixed(1)} kg
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className={`text-4xl leading-none ${colorClass}`}>{isDown ? '↓' : isUp ? '↑' : '→'}</p>
+                  <p className={`text-sm font-semibold mt-1 ${colorClass}`}>{isUp ? '+' : ''}{trendData.pct.toFixed(1)}%</p>
+                </div>
+              </div>
+            )
+          })()}
         </div>
       )}
     </div>

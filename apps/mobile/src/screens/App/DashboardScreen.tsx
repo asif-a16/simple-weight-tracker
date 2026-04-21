@@ -89,6 +89,13 @@ export default function DashboardScreen() {
     return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
   }, [logs, filter, selectedYear, customFrom, customTo])
 
+  const trendData = useMemo(() => {
+    if (filtered.length < 2) return null
+    const diff = filtered[filtered.length - 1].weight_kg - filtered[0].weight_kg
+    const pct = (diff / filtered[0].weight_kg) * 100
+    return { diff, pct }
+  }, [filtered])
+
   const chartData = filtered.map((l) => ({ x: l.logged_at, y: l.weight_kg }))
   const weights = filtered.map((l) => l.weight_kg)
   const minW = weights.length ? Math.min(...weights) : 0
@@ -218,6 +225,27 @@ export default function DashboardScreen() {
           ))}
         </View>
       )}
+      {trendData && (() => {
+        const isDown = trendData.diff < 0
+        const isUp = trendData.diff > 0
+        const trendColor = isDown ? '#16a34a' : isUp ? '#ef4444' : colors.textSecondary
+        const trendBg = isDown ? (dark ? '#052e16' : '#f0fdf4') : isUp ? (dark ? '#450a0a' : '#fef2f2') : colors.surface
+        const trendBorder = isDown ? (dark ? '#166534' : '#bbf7d0') : isUp ? (dark ? '#991b1b' : '#fecaca') : colors.border
+        return (
+          <View style={[s.trendCard, { backgroundColor: trendBg, borderColor: trendBorder }]}>
+            <View>
+              <Text style={[s.trendLabel, { color: colors.textSecondary }]}>Period change</Text>
+              <Text style={[s.trendValue, { color: trendColor }]}>
+                {isUp ? '+' : ''}{trendData.diff.toFixed(1)} kg
+              </Text>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={[s.trendArrow, { color: trendColor }]}>{isDown ? '↓' : isUp ? '↑' : '→'}</Text>
+              <Text style={[s.trendPct, { color: trendColor }]}>{isUp ? '+' : ''}{trendData.pct.toFixed(1)}%</Text>
+            </View>
+          </View>
+        )
+      })()}
     </ScrollView>
 
     <View style={s.bottomBar}>
@@ -302,6 +330,16 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     },
     statValue: { fontSize: 20, fontWeight: '700', color: colors.text },
     statLabel: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+    trendCard: {
+      flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+      borderRadius: 16, padding: 16, marginTop: 0, borderWidth: 1,
+      shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
+    },
+    trendLabel: { fontSize: 12, marginBottom: 4 },
+    trendValue: { fontSize: 22, fontWeight: '700' },
+    trendArrow: { fontSize: 32, lineHeight: 36, fontWeight: '600' },
+    trendPct: { fontSize: 13, fontWeight: '600', marginTop: 2 },
     toast: {
       position: 'absolute', bottom: 100, alignSelf: 'center',
       backgroundColor: '#1f2937', borderRadius: 24,

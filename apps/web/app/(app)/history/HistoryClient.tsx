@@ -8,6 +8,43 @@ import { createClient } from '@/lib/supabase/client'
 import LogWeightForm from '@/components/weight/LogWeightForm'
 import DateRangePicker from '@/components/ui/DateRangePicker'
 
+function getWeekStart(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const date = new Date(Date.UTC(y, m - 1, d))
+  const dow = date.getUTCDay()
+  date.setUTCDate(date.getUTCDate() + (dow === 0 ? -6 : 1 - dow))
+  return date.toISOString().slice(0, 10)
+}
+
+function getWeekEnd(weekStart: string): string {
+  const [y, m, d] = weekStart.split('-').map(Number)
+  const date = new Date(Date.UTC(y, m - 1, d))
+  date.setUTCDate(date.getUTCDate() + 6)
+  return date.toISOString().slice(0, 10)
+}
+
+const SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
+function fmtShort(dateStr: string): string {
+  const [, m, d] = dateStr.split('-').map(Number)
+  return `${d} ${SHORT_MONTHS[m - 1]}`
+}
+
+function groupByWeek<T extends { logged_at: string }>(logs: T[]): { label: string; entries: T[] }[] {
+  const map = new Map<string, T[]>()
+  for (const log of logs) {
+    const ws = getWeekStart(log.logged_at)
+    if (!map.has(ws)) map.set(ws, [])
+    map.get(ws)!.push(log)
+  }
+  return Array.from(map.entries())
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([ws, entries]) => ({
+      label: `${fmtShort(ws)} – ${fmtShort(getWeekEnd(ws))}`,
+      entries,
+    }))
+}
+
 type HistoryFilter = DateFilter
 const FILTERS: { label: string; value: HistoryFilter }[] = [
   { label: 'All', value: 'all' },
@@ -125,25 +162,24 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
-            {filtered.map((log) => (
-              <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                <td className="px-4 py-3 text-gray-900 dark:text-gray-100 font-medium">{formatDate(log.logged_at)}</td>
-                <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{formatWeight(log.weight_kg)}</td>
-                <td className="px-4 py-3 text-right space-x-2">
-                  <button
-                    onClick={() => setEditEntry(log)}
-                    className="text-blue-600 hover:underline font-medium"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => setDeleteId(log.id)}
-                    className="text-red-500 hover:underline font-medium"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
+            {groupByWeek(filtered).map(({ label, entries }) => (
+              <React.Fragment key={label}>
+                <tr>
+                  <td colSpan={3} className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-[#181A1B]">
+                    {label}
+                  </td>
+                </tr>
+                {entries.map((log) => (
+                  <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100 font-medium">{formatDate(log.logged_at)}</td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{formatWeight(log.weight_kg)}</td>
+                    <td className="px-4 py-3 text-right space-x-2">
+                      <button onClick={() => setEditEntry(log)} className="text-blue-600 hover:underline font-medium">Edit</button>
+                      <button onClick={() => setDeleteId(log.id)} className="text-red-500 hover:underline font-medium">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </React.Fragment>
             ))}
           </tbody>
         </table>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import {
-  View, Text, StyleSheet, FlatList, TouchableOpacity,
+  View, Text, StyleSheet, SectionList, TouchableOpacity,
   Modal, Alert, ActivityIndicator, ScrollView,
 } from 'react-native'
 import DateRangePicker from '../../components/DateRangePicker'
@@ -9,6 +9,28 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 import LogScreen from './LogScreen'
+
+function getWeekStart(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const date = new Date(Date.UTC(y, m - 1, d))
+  const dow = date.getUTCDay()
+  date.setUTCDate(date.getUTCDate() + (dow === 0 ? -6 : 1 - dow))
+  return date.toISOString().slice(0, 10)
+}
+
+function getWeekEnd(weekStart: string): string {
+  const [y, m, d] = weekStart.split('-').map(Number)
+  const date = new Date(Date.UTC(y, m - 1, d))
+  date.setUTCDate(date.getUTCDate() + 6)
+  return date.toISOString().slice(0, 10)
+}
+
+const SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
+function fmtShort(dateStr: string): string {
+  const [, m, d] = dateStr.split('-').map(Number)
+  return `${d} ${SHORT_MONTHS[m - 1]}`
+}
 
 type HistoryFilter = DateFilter
 const FILTERS: { label: string; value: HistoryFilter }[] = [
@@ -64,6 +86,21 @@ export default function HistoryScreen() {
     return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
   }, [logs, filter, customFrom, customTo])
 
+  const sections = useMemo(() => {
+    const map = new Map<string, WeightLog[]>()
+    for (const log of filtered) {
+      const ws = getWeekStart(log.logged_at)
+      if (!map.has(ws)) map.set(ws, [])
+      map.get(ws)!.push(log)
+    }
+    return Array.from(map.entries())
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([ws, data]) => ({
+        title: `${fmtShort(ws)} – ${fmtShort(getWeekEnd(ws))}`,
+        data,
+      }))
+  }, [filtered])
+
   async function handleDelete(id: string) {
     Alert.alert('Delete entry?', 'This action cannot be undone.', [
       { text: 'Cancel', style: 'cancel' },
@@ -104,8 +141,8 @@ export default function HistoryScreen() {
         </View>
       )}
 
-      <FlatList
-        data={filtered}
+      <SectionList
+        sections={sections}
         keyExtractor={(l) => l.id}
         contentContainerStyle={s.list}
         ListEmptyComponent={
@@ -114,6 +151,11 @@ export default function HistoryScreen() {
             {logs.length === 0 && <Text style={s.emptySubText}>Log your first weight to see it here.</Text>}
           </View>
         }
+        renderSectionHeader={({ section }) => (
+          <View style={s.weekHeader}>
+            <Text style={s.weekHeaderText}>{section.title}</Text>
+          </View>
+        )}
         renderItem={({ item }) => (
           <View style={s.row}>
             <View style={s.rowLeft}>
@@ -169,6 +211,8 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     customRow: { paddingHorizontal: 16, paddingBottom: 8 },
     filterTextActive: { color: '#fff' },
     list: { paddingHorizontal: 16, paddingBottom: 100 },
+    weekHeader: { paddingVertical: 6, paddingHorizontal: 4, marginTop: 8 },
+    weekHeaderText: { fontSize: 11, fontWeight: '600', color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.8 },
     row: {
       flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
       backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 8,
