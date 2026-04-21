@@ -215,8 +215,8 @@ export default function DashboardScreen() {
         <View style={s.statsRow}>
           {[
             { label: 'Entries', value: filtered.length.toString() },
-            { label: 'Min', value: formatWeight(Math.min(...weights)) },
-            { label: 'Max', value: formatWeight(Math.max(...weights)) },
+            { label: 'Min (kg)', value: Math.min(...weights).toFixed(1) },
+            { label: 'Max (kg)', value: Math.max(...weights).toFixed(1) },
           ].map(({ label, value }) => (
             <View key={label} style={s.statCard}>
               <Text style={s.statValue}>{value}</Text>
@@ -332,7 +332,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     statLabel: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
     trendCard: {
       flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-      borderRadius: 16, padding: 16, marginTop: 0, borderWidth: 1,
+      borderRadius: 16, padding: 16, marginTop: 12, borderWidth: 1,
       shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
     },

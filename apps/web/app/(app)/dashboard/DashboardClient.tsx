@@ -186,8 +186,8 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
           <div className="grid grid-cols-3 gap-4">
             {[
               { label: 'Entries', value: filtered.length },
-              { label: 'Min', value: formatWeight(Math.min(...weights)) },
-              { label: 'Max', value: formatWeight(Math.max(...weights)) },
+              { label: 'Min (kg)', value: Math.min(...weights).toFixed(1) },
+              { label: 'Max (kg)', value: Math.max(...weights).toFixed(1) },
             ].map(({ label, value }) => (
               <div key={label} className="bg-white dark:bg-[#1B1D1E] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 text-center">
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
