@@ -22,7 +22,7 @@ export default function CalendarScreen() {
   const fetchAll = useCallback(async () => {
     if (!user) return
     const [{ data: logData }, { data: profile }] = await Promise.all([
-      supabase.from('weight_logs').select('*').eq('user_id', user.id).order('logged_at'),
+      supabase.from('weight_logs').select('*').eq('user_id', user.id).order('logged_at').limit(10000),
       supabase.from('profiles').select('created_at').eq('id', user.id).single(),
     ])
     setLogs(logData ?? [])

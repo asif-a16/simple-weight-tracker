@@ -15,7 +15,32 @@
       "Bash(xargs head *)",
       "Bash(node -e \"const ts = require\\('typescript'\\); const host = ts.createCompilerHost\\({}\\); console.log\\(host.resolveModuleNames\\); const result = ts.resolveModuleName\\('@simple-wt/shared', 'C:/Users/a/Documents/repos/simple-weight-tracker/apps/web/lib/supabase/client.ts', {moduleResolution: ts.ModuleResolutionKind.Bundler, paths: {'@simple-wt/shared': ['../../packages/shared/src/index.ts']}}, host\\); console.log\\(JSON.stringify\\(result, null, 2\\)\\)\")",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k,v\\) for k,v in d.get\\('exports',{}\\).items\\(\\)]\")",
-      "Bash(pnpm --filter web add @supabase/supabase-js@2.49.4 @supabase/ssr@0.5.2)"
+      "Bash(pnpm --filter web add @supabase/supabase-js@2.49.4 @supabase/ssr@0.5.2)",
+      "Bash(pnpm --filter web typecheck)",
+      "Bash(pnpm --filter mobile typecheck)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Replace manual date inputs with calendar pickers, fix filter button clipping *)",
+      "Bash(git commit -m 'Move Export CSV to new Settings tab, add dark mode toggle and sign out *)",
+      "Bash(git commit -m 'Fix weight log insert missing user_id, back button closes calendar modal, filter scroll shrink *)",
+      "Bash(git commit -m 'Fix weight input clearing in edit mode using local string state *)",
+      "Bash(git commit -m 'Remove Log tab, add log modal to dashboard, remove notes feature *)",
+      "Bash(git commit -m 'Make log weight popup a floating bottom sheet card *)",
+      "Bash(git commit -m 'Center log weight card in middle of screen *)",
+      "Bash(git commit -m 'Replace manual date input with calendar picker in log form *)",
+      "Bash(git -C \"c:/Users/a/Documents/repos/simple-weight-tracker\" status)",
+      "Bash(git commit -m ' *)",
+      "Bash(pnpm add *)",
+      "Bash(node -e \"require\\('sharp'\\)\")",
+      "Bash(node apps/mobile/scripts/generate-icons.mjs)",
+      "Bash(npx expo *)",
+      "Bash(node ../../node_modules/expo/bin/cli prebuild --platform android --clean)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(node ../../node_modules/react-native/cli.js bundle --platform android --dev false --entry-file index.ts --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res)",
+      "Bash(node ../../node_modules/@react-native-community/cli/build/bin.js bundle --platform android --dev false --entry-file index.ts --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res)",
+      "Bash(../../node_modules/.bin/react-native bundle *)",
+      "Bash(node ../../node_modules/expo/bin/cli export:embed --platform android --entry-file index.ts --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res)",
+      "Bash(node ../../node_modules/expo/bin/cli export:embed --platform android --dev false --entry-file index.ts --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res)",
+      "Bash(node ../../node_modules/expo/bin/cli prebuild --platform android)"
     ]
   }
 }

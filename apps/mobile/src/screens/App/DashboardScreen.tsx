@@ -56,6 +56,7 @@ export default function DashboardScreen() {
       .select('id, weight_kg, logged_at')
       .eq('user_id', user.id)
       .order('logged_at', { ascending: true })
+      .limit(10000)
       .then(({ data }) => { setLogs(data ?? []); setLoading(false) })
   }, [user])
 

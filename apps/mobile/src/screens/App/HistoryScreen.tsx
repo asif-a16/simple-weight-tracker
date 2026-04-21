@@ -38,6 +38,7 @@ export default function HistoryScreen() {
       .select('*')
       .eq('user_id', user.id)
       .order('logged_at', { ascending: false })
+      .limit(10000)
     setLogs(data ?? [])
     setLoading(false)
   }, [user])
