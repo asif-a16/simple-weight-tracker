@@ -22,7 +22,10 @@ export default function CalendarClient({ logs, accountCreatedAt }: Props) {
 
   const logMap = new Map(logs.map((l) => [l.logged_at, l]))
   const today = now.toISOString().slice(0, 10)
-  const minDate = accountCreatedAt.slice(0, 7)
+  const earliestLog = logs.length > 0
+    ? logs.map(l => l.logged_at).reduce((a, b) => (a < b ? a : b))
+    : accountCreatedAt
+  const minDate = earliestLog.slice(0, 7)
 
   const currentMonth = `${year}-${String(month + 1).padStart(2, '0')}`
 
