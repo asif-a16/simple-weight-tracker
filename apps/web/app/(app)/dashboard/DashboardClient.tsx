@@ -33,6 +33,7 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
   const today = new Date().toISOString().slice(0, 10)
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState(currentYear)
+  const [showDots, setShowDots] = useState(false)
 
   const earliestYear = logs.length > 0
     ? Math.min(...logs.map(l => parseInt(l.logged_at.slice(0, 4))))
@@ -95,6 +96,17 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
           </div>
         )}
 
+        <button
+          onClick={() => setShowDots(v => !v)}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            showDots
+              ? 'bg-blue-600 text-white'
+              : 'bg-white dark:bg-[#1B1D1E] border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+          }`}
+        >
+          Dots
+        </button>
+
         {filter === 'custom' && (
           <div className="mt-2 w-full sm:w-auto sm:mt-0">
             <DateRangePicker
@@ -152,7 +164,7 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
                 dataKey="weight"
                 stroke="#2563eb"
                 strokeWidth={2}
-                dot={<Dot r={4} fill="#2563eb" stroke="#fff" strokeWidth={2} />}
+                dot={showDots ? <Dot r={4} fill="#2563eb" stroke="#fff" strokeWidth={2} /> : false}
                 activeDot={{ r: 6 }}
                 connectNulls={false}
               />

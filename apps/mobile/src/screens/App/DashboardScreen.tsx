@@ -38,6 +38,7 @@ export default function DashboardScreen() {
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
   const [logVisible, setLogVisible] = useState(false)
+  const [showDots, setShowDots] = useState(false)
   const weightInputRef = useRef<TextInput>(null)
   const toastOpacity = useRef(new Animated.Value(0)).current
 
@@ -114,6 +115,13 @@ export default function DashboardScreen() {
         ))}
       </ScrollView>
 
+      <TouchableOpacity
+        onPress={() => setShowDots(v => !v)}
+        style={[s.filterBtn, showDots && s.filterBtnActive, { marginHorizontal: 16, marginBottom: 4 }]}
+      >
+        <Text style={[s.filterText, showDots && s.filterTextActive]}>Dots</Text>
+      </TouchableOpacity>
+
       {filter === 'year' && (
         <View style={s.yearNav}>
           <TouchableOpacity
@@ -185,11 +193,13 @@ export default function DashboardScreen() {
               style={{ data: { stroke: '#2563eb', strokeWidth: 2 } }}
               interpolation="linear"
             />
-            <VictoryScatter
-              data={chartData}
-              size={4}
-              style={{ data: { fill: '#2563eb', stroke: colors.surface, strokeWidth: 2 } }}
-            />
+            {showDots && (
+              <VictoryScatter
+                data={chartData}
+                size={4}
+                style={{ data: { fill: '#2563eb', stroke: colors.surface, strokeWidth: 2 } }}
+              />
+            )}
           </VictoryChart>
         )}
       </View>
