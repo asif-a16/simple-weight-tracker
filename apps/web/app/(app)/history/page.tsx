@@ -10,6 +10,7 @@ export default async function HistoryPage() {
     .select('*')
     .eq('user_id', user!.id)
     .order('logged_at', { ascending: false })
+    .limit(10000)
 
   return (
     <div className="max-w-3xl mx-auto">

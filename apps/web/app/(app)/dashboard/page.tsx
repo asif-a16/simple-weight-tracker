@@ -12,6 +12,7 @@ export default async function DashboardPage() {
     .select('id, weight_kg, logged_at')
     .eq('user_id', user!.id)
     .order('logged_at', { ascending: true })
+    .limit(10000)
 
   const { data: profile } = await supabase
     .from('profiles')
