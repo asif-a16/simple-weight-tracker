@@ -11,7 +11,33 @@ import {
   formatWeekLabel,
   groupByWeek,
   calcTrend,
+  isISODate,
+  getDateRangeError,
 } from '../utils'
+
+describe('custom date ranges', () => {
+  it('accepts ISO dates and real leap days', () => {
+    expect(isISODate('2024-02-29')).toBe(true)
+    expect(getDateRangeError('2020-01-01', '2024-02-29', '2026-10-23')).toBeNull()
+    expect(getDateRangeError('2024-02-29', '2024-02-29')).toBeNull()
+  })
+
+  it.each(['2025-02-29', '2024-02-30', '2024-04-31', '2024-13-01', '2024-00-01', '2024-01-00', '2024-1-01', '01/01/2024', '2024-01', ''])('rejects invalid ISO date %s', value => {
+    expect(isISODate(value)).toBe(false)
+  })
+
+  it('rejects incomplete and malformed ranges', () => {
+    expect(getDateRangeError('', '2024-01-01')).toContain('Enter both')
+    expect(getDateRangeError('2024-01-01', '')).toContain('Enter both')
+    expect(getDateRangeError('2024-02-30', '2024-03-01')).toContain('Enter valid dates')
+  })
+
+  it('rejects reversed and future ranges', () => {
+    expect(getDateRangeError('2024-03-02', '2024-03-01')).toContain('Start date')
+    expect(getDateRangeError('2026-10-23', '2026-10-24', '2026-10-23')).toContain('on or before 2026-10-23')
+    expect(getDateRangeError('2026-10-24', '2026-10-25', '2026-10-23')).toContain('on or before 2026-10-23')
+  })
+})
 
 // ---------------------------------------------------------------------------
 // formatDate

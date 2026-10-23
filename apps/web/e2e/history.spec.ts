@@ -26,8 +26,8 @@ test('clicking a filter activates it', async ({ page }) => {
 
 test('Custom filter shows date range inputs', async ({ page }) => {
   await page.getByRole('button', { name: 'Custom' }).click()
-  const inputs = page.locator('input[type="date"]')
-  await expect(inputs.first()).toBeVisible()
+  await expect(page.getByLabel('Start date', { exact: true })).toBeVisible()
+  await expect(page.getByLabel('End date', { exact: true })).toBeVisible()
 })
 
 test('history table has correct column headers', async ({ page }) => {

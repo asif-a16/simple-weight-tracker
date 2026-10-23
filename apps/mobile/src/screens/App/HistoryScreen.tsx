@@ -4,7 +4,7 @@ import {
   Modal, Alert, ActivityIndicator, ScrollView,
 } from 'react-native'
 import DateRangePicker from '../../components/DateRangePicker'
-import { formatDate, formatWeight, getDateRange, groupByWeek, type WeightLog, type DateFilter } from '@simple-wt/shared'
+import { formatDate, formatWeight, getDateRange, getDateRangeError, groupByWeek, type WeightLog, type DateFilter } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -30,6 +30,7 @@ export default function HistoryScreen() {
   const [filter, setFilter] = useState<HistoryFilter>('all')
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
+  const today = new Date().toISOString().slice(0, 10)
 
   const fetchLogs = useCallback(async () => {
     if (!user) return
@@ -57,12 +58,12 @@ export default function HistoryScreen() {
   const filtered = useMemo(() => {
     if (filter === 'all') return logs
     if (filter === 'custom') {
-      if (!customFrom || !customTo || customFrom > customTo) return logs
+      if (getDateRangeError(customFrom, customTo, today)) return []
       return logs.filter(l => l.logged_at >= customFrom && l.logged_at <= customTo)
     }
     const { from, to } = getDateRange(filter)
     return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
-  }, [logs, filter, customFrom, customTo])
+  }, [logs, filter, customFrom, customTo, today])
 
   const sections = useMemo(() =>
     groupByWeek(filtered).map(({ label, entries }) => ({ title: label, data: entries }))

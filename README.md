@@ -85,21 +85,37 @@ pnpm --filter mobile start
 
 ## Building the Android APK
 
+Open the **Android APK** workflow in GitHub Actions and download the
+`weight-tracker-apk` artifact from a successful run. It contains
+`weight-tracker.apk` and its SHA-256 checksum. Builds run for mobile changes in
+this repository's pull requests and on `main`, and can be started manually.
+
+The APK supports ARM64 and ARMv7 Android phones. It includes the JavaScript
+bundle, so it runs without a development server. It uses the Expo template's
+development signing key for direct installation. Store distribution requires
+your own release signing key.
+
+The workflow reads the `EXPO_PUBLIC_SUPABASE_URL` and
+`EXPO_PUBLIC_SUPABASE_ANON_KEY` repository secrets. These must be the public
+client configuration for your Supabase project, never a service-role key.
+
+To build locally, install JDK 17 and the Android SDK, install workspace
+dependencies, and configure `apps/mobile/.env` as described above:
+
 ```bash
 cd apps/mobile
 
-# Bundle JS
-node ../../node_modules/expo/bin/cli export:embed \
-  --platform android --dev false \
-  --entry-file index.ts \
-  --bundle-output android/app/src/main/assets/index.android.bundle \
-  --assets-dest android/app/src/main/res
+# Generate the ignored native Android project
+node ../../node_modules/expo/bin/cli prebuild --platform android --no-install
 
-# Build APK
-cd android && ./gradlew assembleDebug
+# Build a standalone APK with bundled JavaScript
+cd android
+./gradlew :app:assembleRelease --no-daemon --max-workers=2 \
+  -PreactNativeArchitectures=armeabi-v7a,arm64-v8a
 ```
 
-Output: `android/app/build/outputs/apk/debug/app-debug.apk`
+Output: `apps/mobile/android/app/build/outputs/apk/release/app-release.apk`.
+On Windows, use `gradlew.bat` instead of `./gradlew`.
 
 ## Database Schema
 

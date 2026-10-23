@@ -1,5 +1,19 @@
 import type { DateFilter, DateRange } from './types'
 
+export function isISODate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const date = new Date(`${value}T00:00:00Z`)
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+}
+
+export function getDateRangeError(from: string, to: string, max?: string): string | null {
+  if (!from || !to) return 'Enter both a start and end date in YYYY-MM-DD format.'
+  if (!isISODate(from) || !isISODate(to)) return 'Enter valid dates in YYYY-MM-DD format.'
+  if (max && (from > max || to > max)) return `Dates must be on or before ${max}.`
+  if (from > to) return 'Start date must be on or before end date.'
+  return null
+}
+
 export function getDateRange(filter: DateFilter): DateRange {
   const today = new Date()
   const to = today.toISOString().slice(0, 10)

@@ -18,7 +18,7 @@ interface Props {
   onSuccess?: () => void
   showHeading?: boolean
   compact?: boolean
-  weightInputRef?: React.RefObject<TextInput>
+  weightInputRef?: React.RefObject<TextInput | null>
 }
 
 export default function LogScreen({ initialDate, initialWeight, entryId, onSuccess, showHeading = false, compact = false, weightInputRef }: Props) {

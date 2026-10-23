@@ -6,7 +6,7 @@ import {
 import DateRangePicker from '../../components/DateRangePicker'
 import { useFocusEffect } from '@react-navigation/native'
 import { VictoryLine, VictoryChart, VictoryAxis, VictoryScatter, VictoryTooltip, VictoryVoronoiContainer } from 'victory-native'
-import { getDateRange, formatDate, formatWeight, calcTrend, type DateFilter } from '@simple-wt/shared'
+import { getDateRange, getDateRangeError, formatDate, formatWeight, calcTrend, type DateFilter } from '@simple-wt/shared'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -14,6 +14,7 @@ import LogScreen from './LogScreen'
 
 type ChartFilter = DateFilter | 'year'
 const FILTERS: { label: string; value: ChartFilter }[] = [
+  { label: 'All', value: 'all' },
   { label: '7d', value: '7d' },
   { label: '30d', value: '30d' },
   { label: '90d', value: '90d' },
@@ -37,6 +38,7 @@ export default function DashboardScreen() {
   const [selectedYear, setSelectedYear] = useState(currentYear)
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
+  const today = new Date().toISOString().slice(0, 10)
   const [logVisible, setLogVisible] = useState(false)
   const [showDots, setShowDots] = useState(false)
   const weightInputRef = useRef<TextInput>(null)
@@ -71,23 +73,24 @@ export default function DashboardScreen() {
     setLoading(false)
   }, [user])
 
-  useFocusEffect(loadLogs)
+  useFocusEffect(useCallback(() => { void loadLogs() }, [loadLogs]))
 
   const earliestYear = logs.length > 0
     ? Math.min(...logs.map(l => parseInt(l.logged_at.slice(0, 4))))
     : currentYear
 
   const filtered = useMemo(() => {
+    if (filter === 'all') return logs
     if (filter === 'year') {
       return logs.filter(l => l.logged_at.startsWith(`${selectedYear}`))
     }
     if (filter === 'custom') {
-      if (!customFrom || !customTo || customFrom > customTo) return []
+      if (getDateRangeError(customFrom, customTo, today)) return []
       return logs.filter(l => l.logged_at >= customFrom && l.logged_at <= customTo)
     }
     const { from, to } = getDateRange(filter as DateFilter)
     return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
-  }, [logs, filter, selectedYear, customFrom, customTo])
+  }, [logs, filter, selectedYear, customFrom, customTo, today])
 
   const trendData = useMemo(() => calcTrend(filtered), [filtered])
 

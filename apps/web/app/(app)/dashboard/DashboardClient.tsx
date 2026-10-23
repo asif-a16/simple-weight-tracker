@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Dot
 } from 'recharts'
-import { getDateRange, formatDate, formatWeight, calcTrend, type DateFilter } from '@simple-wt/shared'
+import { getDateRange, getDateRangeError, formatDate, formatWeight, calcTrend, type DateFilter } from '@simple-wt/shared'
 import DateRangePicker from '@/components/ui/DateRangePicker'
 
 interface LogEntry {
@@ -16,6 +16,7 @@ interface LogEntry {
 type ChartFilter = DateFilter | 'year'
 
 const FILTERS: { label: string; value: ChartFilter }[] = [
+  { label: 'All', value: 'all' },
   { label: '7 days', value: '7d' },
   { label: '30 days', value: '30d' },
   { label: '90 days', value: '90d' },
@@ -40,16 +41,17 @@ export default function DashboardClient({ logs }: { logs: LogEntry[] }) {
     : currentYear
 
   const filtered = useMemo(() => {
+    if (filter === 'all') return logs
     if (filter === 'year') {
       return logs.filter(l => l.logged_at.startsWith(`${selectedYear}`))
     }
     if (filter === 'custom') {
-      if (!customFrom || !customTo || customFrom > customTo) return []
+      if (getDateRangeError(customFrom, customTo, today)) return []
       return logs.filter((l) => l.logged_at >= customFrom && l.logged_at <= customTo)
     }
     const range = getDateRange(filter as DateFilter)
     return logs.filter((l) => l.logged_at >= range.from && l.logged_at <= range.to)
-  }, [logs, filter, customFrom, customTo, selectedYear])
+  }, [logs, filter, customFrom, customTo, selectedYear, today])
 
   const trendData = useMemo(() => calcTrend(filtered), [filtered])
 

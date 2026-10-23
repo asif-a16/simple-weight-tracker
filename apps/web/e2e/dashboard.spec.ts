@@ -10,7 +10,7 @@ test('dashboard page loads', async ({ page }) => {
 })
 
 test('time filter pills are visible', async ({ page }) => {
-  for (const label of ['7 days', '30 days', '90 days', '1 year', 'Year', 'Custom']) {
+  for (const label of ['All', '7 days', '30 days', '90 days', '1 year', 'Year', 'Custom']) {
     await expect(page.getByRole('button', { name: label })).toBeVisible()
   }
 })
@@ -29,7 +29,8 @@ test('Year filter shows year navigation', async ({ page }) => {
 
 test('Custom filter shows date range picker', async ({ page }) => {
   await page.getByRole('button', { name: 'Custom' }).click()
-  await expect(page.locator('input[type="date"]').first()).toBeVisible()
+  await expect(page.getByLabel('Start date', { exact: true })).toBeVisible()
+  await expect(page.getByLabel('End date', { exact: true })).toBeVisible()
 })
 
 test('Dots toggle button is visible', async ({ page }) => {
