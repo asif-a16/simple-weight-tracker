@@ -73,7 +73,7 @@ export default function DashboardScreen() {
     setLoading(false)
   }, [user])
 
-  useFocusEffect(loadLogs)
+  useFocusEffect(useCallback(() => { void loadLogs() }, [loadLogs]))
 
   const earliestYear = logs.length > 0
     ? Math.min(...logs.map(l => parseInt(l.logged_at.slice(0, 4))))
