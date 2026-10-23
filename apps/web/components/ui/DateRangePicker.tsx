@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useId } from 'react'
 import { DayPicker, type DateRange } from 'react-day-picker'
-import { format, parseISO, isValid } from 'date-fns'
+import { format, parseISO } from 'date-fns'
+import { isISODate, getDateRangeError } from '@simple-wt/shared'
 
 interface Props {
   from: string
@@ -12,9 +13,7 @@ interface Props {
 }
 
 function parse(s: string | undefined): Date | undefined {
-  if (!s) return undefined
-  const d = parseISO(s)
-  return isValid(d) ? d : undefined
+  return s && isISODate(s) ? parseISO(s) : undefined
 }
 
 function CalendarIcon() {
@@ -30,6 +29,9 @@ function CalendarIcon() {
 export default function DateRangePicker({ from, to, max, onChange }: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const id = useId()
+  const error = from || to ? getDateRangeError(from, to, max) : null
+  const [month, setMonth] = useState(parse(from) ?? parse(max) ?? new Date())
 
   const fromDate = parse(from)
   const toDate = parse(to)
@@ -46,20 +48,52 @@ export default function DateRangePicker({ from, to, max, onChange }: Props) {
   const selected: DateRange | undefined =
     fromDate || toDate ? { from: fromDate, to: toDate } : undefined
 
-  const btnClass =
-    'flex items-center gap-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#1B1D1E] hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors min-w-[130px] whitespace-nowrap'
-
   return (
-    <div ref={ref} className="relative flex items-center gap-2">
-      <button type="button" onClick={() => setOpen(o => !o)} className={btnClass}>
-        <CalendarIcon />
-        {fromDate ? format(fromDate, 'MMM d, yyyy') : 'Start date'}
-      </button>
-      <span className="text-gray-500 dark:text-gray-400 text-sm">to</span>
-      <button type="button" onClick={() => setOpen(o => !o)} className={btnClass}>
-        <CalendarIcon />
-        {toDate ? format(toDate, 'MMM d, yyyy') : 'End date'}
-      </button>
+    <div ref={ref} className="relative w-full sm:w-auto" onKeyDown={e => { if (e.key === 'Escape') setOpen(false) }}>
+      <div className="flex flex-wrap gap-2">
+        {(['from', 'to'] as const).map(endpoint => {
+          const value = endpoint === 'from' ? from : to
+          const label = endpoint === 'from' ? 'Start date' : 'End date'
+          return (
+            <div key={endpoint} className="flex-1 min-w-[130px] sm:flex-none">
+              <label htmlFor={`${id}-${endpoint}`} className="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">{label}</label>
+              <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1B1D1E] focus-within:ring-2 focus-within:ring-blue-600">
+                <input
+                  id={`${id}-${endpoint}`}
+                  type="text"
+                  value={value}
+                  placeholder="YYYY-MM-DD"
+                  maxLength={10}
+                  autoComplete="off"
+                  aria-invalid={!!error}
+                  aria-describedby={error ? `${id}-error` : undefined}
+                  onChange={e => {
+                    const next = e.target.value
+                    onChange(endpoint === 'from' ? next : from, endpoint === 'to' ? next : to)
+                    const date = parse(next)
+                    if (date && (!maxDate || date <= maxDate)) setMonth(date)
+                  }}
+                  className="w-full sm:w-28 min-w-0 px-3 py-2 bg-transparent rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  aria-label={`Open ${label.toLowerCase()} calendar`}
+                  aria-expanded={open}
+                  onClick={() => {
+                    const date = parse(value) ?? fromDate
+                    setMonth(date && (!maxDate || date <= maxDate) ? date : maxDate ?? new Date())
+                    setOpen(o => !o)
+                  }}
+                  className="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:outline-blue-600"
+                >
+                  <CalendarIcon />
+                </button>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      {error && <p id={`${id}-error`} role="status" className="mt-1 text-xs text-red-600 dark:text-red-400">{error}</p>}
 
       {open && (
         <div className="absolute top-full left-0 mt-2 z-50 bg-white dark:bg-[#1B1D1E] border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-3 w-[280px]">
@@ -67,7 +101,9 @@ export default function DateRangePicker({ from, to, max, onChange }: Props) {
             mode="range"
             selected={selected}
             toDate={maxDate}
-            defaultMonth={fromDate ?? maxDate}
+            disabled={maxDate ? { after: maxDate } : undefined}
+            month={month}
+            onMonthChange={setMonth}
             onSelect={(range) => {
               const f = range?.from ? format(range.from, 'yyyy-MM-dd') : ''
               const t = range?.to ? format(range.to, 'yyyy-MM-dd') : ''

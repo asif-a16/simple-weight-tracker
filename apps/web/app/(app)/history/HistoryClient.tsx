@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { formatDate, formatWeight, toCSV, getDateRange, groupByWeek, type WeightLog, type DateFilter } from '@simple-wt/shared'
+import { formatDate, formatWeight, toCSV, getDateRange, getDateRangeError, groupByWeek, type WeightLog, type DateFilter } from '@simple-wt/shared'
 import { createClient } from '@/lib/supabase/client'
 import LogWeightForm from '@/components/weight/LogWeightForm'
 import DateRangePicker from '@/components/ui/DateRangePicker'
@@ -31,12 +31,12 @@ export default function HistoryClient({ logs }: { logs: WeightLog[] }) {
   const filtered = useMemo(() => {
     if (filter === 'all') return logs
     if (filter === 'custom') {
-      if (!customFrom || !customTo || customFrom > customTo) return logs
+      if (getDateRangeError(customFrom, customTo, today)) return []
       return logs.filter(l => l.logged_at >= customFrom && l.logged_at <= customTo)
     }
     const { from, to } = getDateRange(filter)
     return logs.filter((l) => l.logged_at >= from && l.logged_at <= to)
-  }, [logs, filter, customFrom, customTo])
+  }, [logs, filter, customFrom, customTo, today])
 
   function downloadCSV() {
     const csv = toCSV(logs)
