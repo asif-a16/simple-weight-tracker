@@ -253,7 +253,7 @@ export default function DashboardScreen() {
     </View>
 
     <Modal visible={logVisible} transparent animationType="fade" onRequestClose={() => setLogVisible(false)} onShow={() => setTimeout(() => weightInputRef.current?.focus(), 100)}>
-      <KeyboardAvoidingView style={s.modalOuter} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={s.modalOuter} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <Pressable style={s.overlay} onPress={() => setLogVisible(false)} />
         <View style={s.logCard}>
           <View style={s.logCardHandle} />
