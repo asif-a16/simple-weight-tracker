@@ -23,6 +23,7 @@
       },
       "package": "com.simpleweighttracker.app",
       "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "resize",
       "predictiveBackGestureEnabled": false
     },
     "web": {
